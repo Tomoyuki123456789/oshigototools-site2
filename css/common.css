@@ -100,7 +100,37 @@ a {
   font-size: 10px;
   color: #aaa;
 }
+/* レスポンシブ対応のフッタースタイル */
+@media screen and (max-width: 600px) {
+  .site-footer {
+    font-size: 10px; /* モバイル向けに文字サイズを小さく */
+  }
+  
+  .site-footer .footer-links {
+    flex-wrap: wrap; /* 小さい画面では折り返し可能に */
+    justify-content: center;
+    gap: 0.5rem; /* リンク間のスペースを縮小 */
+  }
+  
+  .site-footer .footer-copy {
+    font-size: 8px; /* コピーライト文のサイズをさらに小さく */
+  }
+}
 
+/* さらに小さい画面向け */
+@media screen and (max-width: 400px) {
+  .site-footer {
+    font-size: 9px;
+  }
+  
+  .site-footer .footer-links {
+    gap: 0.3rem; /* さらにリンク間のスペースを縮小 */
+  }
+  
+  .site-footer .footer-copy {
+    font-size: 7px;
+  }
+}
 
 /* ======================================== */
 /* 問い合わせフォーム用の追加スタイル       */
