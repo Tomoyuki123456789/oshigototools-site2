@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ page.title }}</title>
+  
+  <!-- Meta Tags -->
+  <meta name="description" content="oshigototoolsは、日々のお仕事で使える便利でシンプルなツールを提供し、生産性向上をサポートします。">
+  <meta name="keywords" content="ツール, カレンダー, 時刻選択, ご挨拶, oshigototools, 生産性向上, シンプル">
+  <meta name="robots" content="index, follow">
+  
+  <!-- Open Graph Tags -->
+  <meta property="og:title" content="oshigototools | ツール一覧">
+  <meta property="og:description" content="oshigototoolsは、実務で使えるシンプルで実用的なツールを提供します。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="http://example.com/">
+  <meta property="og:image" content="http://example.com/og-image.jpg">
+  
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "oshigototools",
+    "url": "http://example.com/",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "http://example.com/?s={search_term_string}",
+      "query-input": "required name=search_term_string"
+    },
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+81-XX-XXXX-XXXX",
+      "contactType": "customer service",
+      "email": "contact@example.com"
+    }
+  }
+  </script>
+  
+  <!-- Google Adsense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1022064127594857" crossorigin="anonymous"></script>
+  <!-- Google Tag Manager / Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-9WSSYVFF7J"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-9WSSYVFF7J');
+  </script>
+  
+  <!-- 共通スタイル -->
+  <link rel="stylesheet" href="/css/common.css">
+  
+  <!-- ページ固有スタイル（必要なら各ページで front matter に "styles" 変数を設定） -->
+  {{ page.styles }}
+</head>
+<body>
+  {% include header.html %}
+  
+  <main>
+    {{ content }}
+  </main>
+  
+  {% include footer.html %}
+</body>
+</html>

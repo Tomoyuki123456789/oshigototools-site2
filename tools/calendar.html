@@ -1,0 +1,507 @@
+---
+layout: default
+title: "カレンダー時刻選択ツール"
+---
+<!-- ページ固有のスタイル：PC幅510px＋margin auto、モバイルは100vw -->
+<style>
+  /* PC版（769px以上） */
+  @media (min-width: 769px) {
+    .container {
+      width: 510px;
+      margin: 20px auto; /* 中央寄せ */
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+    .result-area {
+      width: 510px; /* カレンダー(370) + gap(20) + time-select(120) = 510 */
+      margin: 10px auto 0; /* 上下に余白 */
+    }
+    .result-area textarea {
+      width: 510px;
+      height: 150px;
+    }
+    .btn-area {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+    }
+  }
+
+  /* モバイル（768px以下） */
+  @media (max-width: 768px) {
+    .container {
+      width: 100%;  /* 100%に変更 */
+      margin: 0 auto;
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+      justify-content: center; /* 中央寄せを追加 */
+      overflow-x: hidden;
+      align-items: flex-start;
+      padding: 0 5px; /* 左右に少しだけパディングを追加 */
+    }
+    .calendar-container {
+      width: calc(100% - 90px - 10px); /* 100%ベースに変更 */
+    }
+    .result-area {
+      width: 100%; /* 100%に変更 */
+      margin: 10px auto 0;
+      padding: 0 5px; /* 左右に少しパディングを追加 */
+    }
+    .result-area textarea {
+      width: 100%; /* 100%に変更 */
+      height: 100px;
+    }
+    .btn-area {
+      flex-direction: row;
+      justify-content: center;
+      gap: 10px;
+    }
+  }
+
+  .calendar-container {
+    border: 1px solid #ccc;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    width: 370px; 
+    position: relative;
+    box-sizing: border-box; /* ボックスサイズ計算を追加 */
+  }
+  .time-select {
+    width: 80px; /* モバイルでは少し狭く */
+    border: 1px solid #ccc;
+    box-shadow:
+      inset 0 -6px 6px -6px rgba(0,0,0,0.15),
+      inset 0 6px 6px -6px rgba(0,0,0,0.15);
+    overflow-y: auto;
+    box-sizing: border-box; /* ボックスサイズ計算を追加 */
+  }
+  @media (min-width: 769px) {
+    .time-select {
+      width: 120px; /* PC版では元の幅 */
+    }
+  }
+  .month-select {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .nav-btn {
+    width: 60px;
+    height: 40px;
+    font-size: 16px;
+  }
+  .month-display {
+    height: 40px;
+    line-height: 40px;
+    font-size: 16px;
+    text-align: center;
+    flex: 1;
+    margin: 0 8px;
+  }
+  .calendar-container table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  .calendar-container th,
+  .calendar-container td {
+    width: 14.28%; /* テーブルセルを均等割り */
+    height: 40px;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+  }
+  .calendar-container th {
+    background-color: #f0f0f0;
+  }
+  .calendar-container td:hover {
+    background-color: #d0f0ff;
+  }
+  .selected-date {
+    background-color: #a0e0ff !important;
+  }
+  .adjacent-month {
+    color: #999;
+  }
+  .today {
+    background-color: #eee !important;
+  }
+  .saturday {
+    background-color: #e0f7ff;
+  }
+  .sunday {
+    background-color: #ffe0e0;
+  }
+  .time-option {
+    font-size: 14px;
+    padding: 6px 0;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .time-option:hover {
+    background-color: #d0f0ff;
+  }
+  .selected-time {
+    background-color: #a0e0ff !important;
+  }
+  .btn-area {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+  }
+  button {
+  cursor: pointer;
+  padding: 8px 16px;
+  height: 30px; /* 高さを明示的に指定 */
+  box-sizing: border-box; /* パディングを含めた高さ計算 */
+  }
+  /* すべての要素にボックスサイジングを適用 */
+  * {
+    box-sizing: border-box;
+  }
+  .tooltip {
+    display: inline-block;
+    height: 30px; /* ボタンと同じ高さを指定 */
+    vertical-align: top; /* 上端を揃える */
+  }
+
+  .tooltip button {
+  height: 100%;
+  }
+
+  .tooltip .tooltip-text {
+    visibility: hidden;
+    width: 140px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%; /* ボタンの上に表示 */
+    left: 50%;
+    margin-left: -60px; /* 中央配置の調整 */
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .tooltip .tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: rgba(0, 0, 0, 0.7) transparent transparent transparent;
+  }
+
+  .tooltip .tooltip-text.show {
+    visibility: visible;
+    opacity: 1;
+  }
+</style>
+
+<!-- ヘッダー（画像なし版） -->
+<header>
+  <h1 style="font-size: 21px; text-align: center;">
+    カレンダー時刻選択ツール
+  </h1>
+</header>
+
+<!-- カレンダー & 時刻セレクタ部分 -->
+<div class="container" id="topContainer">
+  <div class="calendar-container" id="calendarContainer">
+    <div class="month-select">
+      <button id="prevMonthBtn" class="nav-btn">&lt;</button>
+      <span id="monthDisplay" class="month-display"></span>
+      <button id="nextMonthBtn" class="nav-btn">&gt;</button>
+    </div>
+    <div id="calendarBody"></div>
+  </div>
+  <div class="time-select" id="timeSelect"></div>
+</div>
+
+<!-- 結果表示部分 -->
+<div class="result-area">
+  <textarea id="resultText"></textarea>
+  <div class="btn-area">
+    <div class="tooltip">
+      <button id="copyBtn">COPY</button>
+      <span class="tooltip-text" id="copyTooltip">コピーしました！</span>
+    </div>
+    <button id="resetBtn">RESET</button>
+  </div>
+</div>
+
+<!-- 
+  ★ フッターはレイアウト側で表示される場合、ここでは削除し、フッター重複を防ぐ
+  もしページ単位でフッターを表示したい場合は、レイアウト側のfooterを削除してください 
+-->
+
+<script>
+  // ---------------------------
+  // カレンダー & 時刻選択 JS
+  // ---------------------------
+  let currentEntry = null;
+  const resultText = document.getElementById("resultText");
+  const timeSelect = document.getElementById("timeSelect");
+  const prevMonthBtn = document.getElementById("prevMonthBtn");
+  const nextMonthBtn = document.getElementById("nextMonthBtn");
+  const monthDisplay = document.getElementById("monthDisplay");
+  const calendarBody = document.getElementById("calendarBody");
+  const calendarContainer = document.getElementById("calendarContainer");
+
+  const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
+  const today = new Date();
+  const [todayYear, todayMonth, todayDate] = [today.getFullYear(), today.getMonth(), today.getDate()];
+
+  let currentYearMonth = new Date();
+  currentYearMonth.setDate(1);
+
+  function updateMonthDisplay() {
+    monthDisplay.textContent = 
+      currentYearMonth.getFullYear() + "年" + (currentYearMonth.getMonth() + 1) + "月";
+  }
+
+  function formatDateWithWeekday(dateStr) {
+    const dateObj = new Date(dateStr);
+    const [m, d] = [dateObj.getMonth() + 1, dateObj.getDate()];
+    const wday = weekdays[dateObj.getDay()];
+    return `${m}月${d}日(${wday})`;
+  }
+
+  function formatEntry(entry) {
+    let line = "";
+    if (entry.date) {
+      line += formatDateWithWeekday(entry.date);
+    }
+    if (entry.times && entry.times.length > 0) {
+      const timesJoined = entry.times.map(range => {
+        let timeStr = range.start || "";
+        if (range.end) {
+          timeStr += `～${range.end}`;
+        }
+        return timeStr;
+      }).join("、");
+      line += " " + timesJoined;
+    }
+    return line;
+  }
+
+  function updateCurrentEntryLine() {
+    const lines = resultText.value.split("\n");
+    lines[lines.length - 1] = formatEntry(currentEntry);
+    resultText.value = lines.join("\n");
+  }
+
+  function appendNewEntry(entry) {
+    const newLine = formatEntry(entry);
+    if (!resultText.value.trim()) {
+      resultText.value = newLine;
+    } else {
+      resultText.value += "\n" + newLine;
+    }
+  }
+
+  function generateCalendar(dateObj) {
+    calendarBody.innerHTML = "";
+
+    const [year, month] = [dateObj.getFullYear(), dateObj.getMonth() + 1];
+    const firstDay = new Date(year, month - 1, 1);
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const startDay = firstDay.getDay();
+
+    const prevMonthLastDate = new Date(year, month - 1, 0).getDate();
+    const prevMonthYear = (month === 1) ? (year - 1) : year;
+    const prevMonthNum  = (month === 1) ? 12 : (month - 1);
+    const nextMonthYear = (month === 12) ? (year + 1) : year;
+    const nextMonthNum  = (month === 12) ? 1 : (month + 1);
+
+    const table = document.createElement("table");
+    
+    const thead = document.createElement("thead");
+    const headerRow = document.createElement("tr");
+    weekdays.forEach(day => {
+      const th = document.createElement("th");
+      th.textContent = day;
+      headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+    
+    const tbody = document.createElement("tbody");
+    let cellCount = 0;
+    let currentDay = 1;
+    let nextMonthDay = 1;
+
+    for (let row = 0; row < 6; row++) {
+      const tr = document.createElement("tr");
+      for (let col = 0; col < 7; col++) {
+        const cell = document.createElement("td");
+        cellCount++;
+
+        if (cellCount <= startDay) {
+          // 前月の日付
+          const dayNum = prevMonthLastDate - (startDay - cellCount);
+          cell.textContent = dayNum;
+          cell.classList.add("adjacent-month");
+          const pmDateStr = `${prevMonthYear}-${String(prevMonthNum).padStart(2,"0")}-${String(dayNum).padStart(2,"0")}`;
+          cell.setAttribute("data-date", pmDateStr);
+          cell.addEventListener("click", () => {
+            if (currentEntry && currentEntry.date === pmDateStr) return;
+            currentEntry = { date: pmDateStr, times: [] };
+            appendNewEntry(currentEntry);
+            highlightSelectedDate(cell);
+          });
+        } else if (currentDay <= daysInMonth) {
+          // 今月の日付
+          cell.textContent = currentDay;
+          const formattedDate = `${year}-${String(month).padStart(2,"0")}-${String(currentDay).padStart(2,"0")}`;
+          cell.setAttribute("data-date", formattedDate);
+          cell.addEventListener("click", () => {
+            if (currentEntry && currentEntry.date === formattedDate) return;
+            currentEntry = { date: formattedDate, times: [] };
+            appendNewEntry(currentEntry);
+            highlightSelectedDate(cell);
+          });
+          currentDay++;
+        } else {
+          // 次月の日付
+          cell.textContent = nextMonthDay;
+          cell.classList.add("adjacent-month");
+          const nmDateStr = `${nextMonthYear}-${String(nextMonthNum).padStart(2,"0")}-${String(nextMonthDay).padStart(2,"0")}`;
+          cell.setAttribute("data-date", nmDateStr);
+          cell.addEventListener("click", () => {
+            if (currentEntry && currentEntry.date === nmDateStr) return;
+            currentEntry = { date: nmDateStr, times: [] };
+            appendNewEntry(currentEntry);
+            highlightSelectedDate(cell);
+          });
+          nextMonthDay++;
+        }
+
+        // 曜日別スタイル
+        if (col === 0) {
+          cell.classList.add("sunday");
+        } else if (col === 6) {
+          cell.classList.add("saturday");
+        }
+        // 今日判定
+        const cellDate = new Date(cell.getAttribute("data-date"));
+        if (cellDate.getFullYear() === todayYear &&
+            cellDate.getMonth() === todayMonth &&
+            cellDate.getDate() === todayDate) {
+          cell.classList.add("today");
+        }
+
+        tr.appendChild(cell);
+      }
+      tbody.appendChild(tr);
+    }
+    table.appendChild(tbody);
+    calendarBody.appendChild(table);
+    adjustTimeSelectHeight();
+  }
+
+  function highlightSelectedDate(selectedCell) {
+    const allCells = calendarBody.querySelectorAll("td[data-date]");
+    allCells.forEach(cell => cell.classList.remove("selected-date"));
+    selectedCell.classList.add("selected-date");
+  }
+
+  function adjustTimeSelectHeight() {
+    const calendarRect = calendarContainer.getBoundingClientRect();
+    timeSelect.style.height = calendarRect.height + "px";
+  }
+
+  function generateTimeOptions() {
+    timeSelect.innerHTML = "";
+    for (let i = 0; i <= 48; i++) {
+      const hour = Math.floor(i / 2);
+      const minute = (i % 2) * 30;
+      if (hour === 24 && minute > 0) continue;
+      const timeStr = `${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`;
+      const div = document.createElement("div");
+      div.className = "time-option";
+      div.textContent = timeStr;
+      div.setAttribute("data-time", timeStr);
+      div.addEventListener("click", () => {
+        if (!currentEntry || !currentEntry.date) {
+          alert("先に日付を選択してください。");
+          return;
+        }
+        if (!currentEntry.times) currentEntry.times = [];
+        // 開始～終了のペアを決定
+        if (timesAreComplete(currentEntry.times)) {
+          currentEntry.times.push({ start: timeStr, end: "" });
+        } else {
+          currentEntry.times[currentEntry.times.length - 1].end = timeStr;
+        }
+        updateCurrentEntryLine();
+      });
+      timeSelect.appendChild(div);
+    }
+    // 10:00付近へスクロール
+    const tenOption = timeSelect.querySelector('[data-time="10:00"]');
+    if (tenOption) tenOption.scrollIntoView();
+  }
+
+  function timesAreComplete(timesArray) {
+    if (timesArray.length === 0) return true;
+    const lastRange = timesArray[timesArray.length - 1];
+    return (lastRange.start && lastRange.end);
+  }
+
+  // ボタン動作
+  prevMonthBtn.addEventListener("click", () => {
+    currentYearMonth.setMonth(currentYearMonth.getMonth() - 1);
+    updateMonthDisplay();
+    generateCalendar(currentYearMonth);
+  });
+  nextMonthBtn.addEventListener("click", () => {
+    currentYearMonth.setMonth(currentYearMonth.getMonth() + 1);
+    updateMonthDisplay();
+    generateCalendar(currentYearMonth);
+  });
+  document.getElementById("copyBtn").addEventListener("click", () => {
+    const tooltip = document.getElementById("copyTooltip");
+    
+    navigator.clipboard.writeText(resultText.value)
+      .then(() => {
+        // ツールチップを表示
+        tooltip.classList.add("show");
+        
+        // 2秒後に非表示
+        setTimeout(() => {
+          tooltip.classList.remove("show");
+        }, 2000);
+      })
+      .catch(err => { 
+        console.error("コピーに失敗:", err);
+        tooltip.textContent = "コピーに失敗しました";
+        tooltip.classList.add("show");
+        
+        setTimeout(() => {
+          tooltip.classList.remove("show");
+          tooltip.textContent = "コピーしました！"; // テキストを元に戻す
+        }, 2000);
+      });
+  });
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    window.location.reload();
+  });
+  window.addEventListener('resize', () => {
+    adjustTimeSelectHeight();
+  });
+
+  // 初期表示
+  updateMonthDisplay();
+  generateCalendar(currentYearMonth);
+  generateTimeOptions();
+</script>

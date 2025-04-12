@@ -1,0 +1,147 @@
+/* /css/common.css */
+:root {
+  --font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --primary-color: #007BFF;
+  --text-color: #333;
+  --background-color: #fff;
+  --border-color: #ccc;
+  --footer-text-color: #666;
+  --base-margin: 40px;
+  --base-padding: 20px;
+  --base-line-height: 1.8;
+  --h1-size: 28px;
+  --h1-size-sm: 22px;
+  --font-size-base: 16px;
+  --link-color: blue;
+  --container-max-width: 800px;
+  --space-xs: 5px;
+  --space-sm: 10px;
+  --space-md: 20px;
+  --space-lg: 40px;
+  --fs-lg: 20px;
+  --radius: 4px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-family);
+  max-width: var(--container-max-width);
+  margin: var(--base-margin) auto;
+  padding: var(--base-padding);
+  background-color: var(--background-color);
+  color: var(--text-color);
+  line-height: var(--base-line-height);
+}
+
+header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+h1 {
+  font-size: var(--h1-size);
+  margin-bottom: 20px;
+}
+
+p {
+  font-size: var(--font-size-base);
+  margin-bottom: 20px;
+}
+
+a {
+  color: var(--link-color);
+  text-decoration: none;
+}
+
+/* 新しいフッタースタイル */
+.site-footer {
+  background-color: transparent;  /* 背景を透明に */
+  border-top: none;               /* 境界線を削除 */
+  padding: 5px 0;
+  margin-top: 20px;               /* ここを増やしてフッターの位置を下げる */
+  font-size: 12px;
+  color: #aaa;
+  text-align: center;
+}
+
+.site-footer .footer-container {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.site-footer .footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: inline-flex;
+  gap: 1rem;
+}
+
+.site-footer .footer-links li {
+  margin: 0;
+}
+
+.site-footer .footer-links a {
+  text-decoration: none;
+  color: #aaa;
+  transition: color 0.2s;
+}
+
+.site-footer .footer-links a:hover {
+  color: #888;
+}
+
+.site-footer .footer-copy {
+  margin-top: 5px;
+  font-size: 10px;
+  color: #aaa;
+}
+
+
+/* ======================================== */
+/* 問い合わせフォーム用の追加スタイル       */
+/* ======================================== */
+
+/* フォームを中央寄せ＋幅を抑える */
+.contact-container {
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+/* ラベルや入力欄など問い合わせフォーム要素 */
+.contact-form label {
+  font-size: 16px;
+  display: inline-block;
+  margin-bottom: 5px;
+}
+
+.contact-form input[type="text"],
+.contact-form input[type="email"],
+.contact-form textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  margin-bottom: 15px;
+  font-size: 16px;
+  font-family: var(--font-family);
+}
+
+.contact-form button {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: var(--primary-color);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.contact-form button:hover {
+  background-color: #0056b3; /* primary-color を少し濃くした例 */
+}
