@@ -165,10 +165,11 @@ title: "カレンダー時刻選択ツール"
     box-sizing: border-box;
   }
   .tooltip {
-    display: inline-block;
-    height: 30px; /* ボタンと同じ高さを指定 */
-    vertical-align: top; /* 上端を揃える */
-  }
+  position: relative; /* これを追加 */
+  display: inline-block;
+  height: 30px;
+  vertical-align: top;
+}
 
   .tooltip button {
   height: 100%;
@@ -184,9 +185,9 @@ title: "カレンダー時刻選択ツール"
     padding: 5px;
     position: absolute;
     z-index: 1;
-    bottom: 125%; /* ボタンの上に表示 */
+    top: -40px; /* bottom: 125%の代わりにこちらを使用 */
     left: 50%;
-    margin-left: -60px; /* 中央配置の調整 */
+    margin-left: -70px; /* 中央配置の調整 */
     opacity: 0;
     transition: opacity 0.3s;
   }
