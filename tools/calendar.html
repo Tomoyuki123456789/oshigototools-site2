@@ -165,7 +165,7 @@ title: "カレンダー時刻選択ツール"
     box-sizing: border-box;
   }
   .tooltip {
-  position: relative; /* これを追加 */
+  position: relative !important; /* !importantを追加 */
   display: inline-block;
   height: 30px;
   vertical-align: top;
@@ -183,13 +183,14 @@ title: "カレンダー時刻選択ツール"
     text-align: center;
     border-radius: 6px;
     padding: 5px;
-    position: absolute;
-    z-index: 1;
-    top: -40px; /* bottom: 125%の代わりにこちらを使用 */
+    position: absolute !important; /* !importantを追加 */
+    z-index: 9999 !important; /* より高いz-indexを設定 */
+    top: -40px;
     left: 50%;
-    margin-left: -70px; /* 中央配置の調整 */
+    margin-left: -70px;
     opacity: 0;
     transition: opacity 0.3s;
+    pointer-events: none; /* ホバーの問題を防止 */
   }
 
   .tooltip .tooltip-text::after {
@@ -203,9 +204,10 @@ title: "カレンダー時刻選択ツール"
     border-color: rgba(0, 0, 0, 0.7) transparent transparent transparent;
   }
 
+  /* showクラスをより強力に */
   .tooltip .tooltip-text.show {
-    visibility: visible;
-    opacity: 1;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 </style>
 
@@ -472,29 +474,37 @@ title: "カレンダー時刻選択ツール"
     generateCalendar(currentYearMonth);
   });
   document.getElementById("copyBtn").addEventListener("click", () => {
-    const tooltip = document.getElementById("copyTooltip");
-    
-    navigator.clipboard.writeText(resultText.value)
-      .then(() => {
-        // ツールチップを表示
-        tooltip.classList.add("show");
-        
-        // 2秒後に非表示
-        setTimeout(() => {
-          tooltip.classList.remove("show");
-        }, 2000);
-      })
-      .catch(err => { 
-        console.error("コピーに失敗:", err);
-        tooltip.textContent = "コピーに失敗しました";
-        tooltip.classList.add("show");
-        
-        setTimeout(() => {
-          tooltip.classList.remove("show");
-          tooltip.textContent = "コピーしました！"; // テキストを元に戻す
-        }, 2000);
-      });
-  });
+  const tooltip = document.getElementById("copyTooltip");
+  
+  navigator.clipboard.writeText(resultText.value)
+    .then(() => {
+      // DOMを強制的に更新
+      tooltip.style.visibility = "visible";
+      tooltip.style.opacity = "1";
+      tooltip.classList.add("show");
+      
+      // 2秒後に非表示
+      setTimeout(() => {
+        tooltip.classList.remove("show");
+        tooltip.style.visibility = "hidden";
+        tooltip.style.opacity = "0";
+      }, 2000);
+    })
+    .catch(err => { 
+      console.error("コピーに失敗:", err);
+      tooltip.textContent = "コピーに失敗しました";
+      tooltip.style.visibility = "visible";
+      tooltip.style.opacity = "1";
+      tooltip.classList.add("show");
+      
+      setTimeout(() => {
+        tooltip.classList.remove("show");
+        tooltip.style.visibility = "hidden";
+        tooltip.style.opacity = "0";
+        tooltip.textContent = "コピーしました！"; // テキストを元に戻す
+      }, 2000);
+    });
+});
   document.getElementById("resetBtn").addEventListener("click", () => {
     window.location.reload();
   });
