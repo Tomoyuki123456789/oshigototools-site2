@@ -1,0 +1,668 @@
+---
+layout: default
+title: "送付状PDF生成ツール"
+---
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- jsPDF 本体 (UMD版) -->
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+  <style>
+    /* ページ全体のスタイリング */
+    * {
+      box-sizing: border-box;
+    }
+    
+    /* コンテナを中央寄せにする調整済みスタイル */
+    .container {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 30px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 1.8rem;
+      color: #2c3e50;
+    }
+    
+    fieldset {
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      margin-bottom: 25px;
+      padding: 15px;
+      background-color: #fcfcfc;
+    }
+    
+    legend {
+      font-weight: bold;
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+      padding: 0 10px;
+      color: #3498db;
+    }
+    
+    label {
+      display: inline-block;
+      width: 100px;
+      font-weight: bold;
+      margin-bottom: 6px;
+      color: #555;
+    }
+    
+    input, textarea, select {
+      width: calc(100% - 110px);
+      margin-bottom: 10px;
+      padding: 8px 12px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      transition: border-color 0.3s;
+    }
+    
+    input:focus, textarea:focus, select:focus {
+      border-color: #3498db;
+      outline: none;
+    }
+    
+    .flex-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+    
+    .flex-row label {
+      width: auto;
+      min-width: 100px;
+      margin-bottom: 0;
+    }
+    
+    .flex-row input[type="text"],
+    .flex-row input[type="date"],
+    .flex-row input[type="number"] {
+      width: auto;
+      flex: 1;
+    }
+
+    /* 同封物欄 */
+    .doc-list-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .doc-item {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    
+    .doc-item input.docName {
+      flex: 3;
+      min-width: 150px;
+    }
+    
+    .doc-item .count-section {
+      flex: 2;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      justify-content: flex-end; /* 書類名が伸びても数字と単位を右端に揃える */
+    }
+    
+    .docCount {
+      width: 70px;
+    }
+    
+    .unitSelect {
+      width: 70px;
+    }
+
+    button {
+      cursor: pointer;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      transition: background-color 0.3s;
+    }
+    
+    .btn-primary {
+      background-color: #3498db;
+      color: #fff;
+      margin-right: 10px;
+    }
+    
+    .btn-primary:hover {
+      background-color: #2980b9;
+    }
+    
+    .btn-secondary {
+      background-color: #7f8c8d;
+      color: #fff;
+    }
+    
+    .btn-secondary:hover {
+      background-color: #6c7a7a;
+    }
+    
+    .btn-success {
+      background-color: #2ecc71;
+      color: #fff;
+    }
+    
+    .btn-success:hover {
+      background-color: #27ae60;
+    }
+    
+    .btn-danger {
+      background-color: #e74c3c;
+      color: #fff;
+    }
+    
+    .btn-danger:hover {
+      background-color: #c0392b;
+    }
+
+    .actions {
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .hidden { 
+      display: none; 
+    }
+    
+    /* レスポンシブ対応 */
+    @media (max-width: 600px) {
+      .container {
+        padding: 15px;
+      }
+      
+      .flex-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .flex-row label {
+        width: 100%;
+        margin-bottom: 5px;
+      }
+      
+      .flex-row input[type="text"],
+      .flex-row input[type="date"],
+      .flex-row input[type="number"] {
+        width: 100%;
+      }
+      
+      .doc-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .doc-item input.docName {
+        width: 100%;
+      }
+      
+      .doc-item .count-section {
+        width: 100%;
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- レイアウト調整のためheaderタグ削除 -->
+
+  <div class="container">
+    <h1>書類送付状PDF生成ツール</h1>
+    <form id="soufuForm">
+      <!-- 宛先情報 -->
+      <fieldset>
+        <legend>宛先情報</legend>
+        <div class="flex-row">
+          <label>社名</label>
+          <input type="text" id="targetCompany" />
+        </div>
+        <div class="flex-row">
+          <label>部署</label>
+          <input type="text" id="targetDept" />
+        </div>
+        <div class="flex-row">
+          <label>役職</label>
+          <input type="text" id="targetTitle" />
+        </div>
+        <div class="flex-row">
+          <label>氏名</label>
+          <input type="text" id="targetName" />
+        </div>
+      </fieldset>
+
+      <!-- 自社情報 -->
+      <fieldset>
+        <legend>自社情報</legend>
+        <div class="flex-row">
+          <label>社名</label>
+          <input type="text" id="myCompany" />
+        </div>
+        <div class="flex-row">
+          <label>住所</label>
+          <input type="text" id="myAddr" />
+        </div>
+        <div class="flex-row">
+          <label>TEL</label>
+          <input type="text" id="myTel" />
+        </div>
+        <div class="flex-row">
+          <label>部署</label>
+          <input type="text" id="myDept" />
+        </div>
+        <div class="flex-row">
+          <label>役職</label>
+          <input type="text" id="myTitle" />
+        </div>
+        <div class="flex-row">
+          <label>氏名</label>
+          <input type="text" id="myName" />
+        </div>
+      </fieldset>
+
+      <!-- 日付＆タイトル -->
+      <fieldset>
+        <legend>書類タイトル＆日付</legend>
+        <div class="flex-row">
+          <label>日付</label>
+          <input type="date" id="sendDate" />
+        </div>
+        <div class="flex-row">
+          <label>タイトル</label>
+          <input type="text" id="docTitle" value="書類送付について" />
+        </div>
+      </fieldset>
+
+      <!-- 同封物一覧 -->
+      <fieldset>
+        <legend>同封物一覧</legend>
+        <div id="docList" class="doc-list-container">
+          <div class="doc-item">
+            <input type="text" class="docName" placeholder="書類名" />
+            <div class="count-section">
+              <input type="number" class="docCount" placeholder="部数" min="1" value="1" />
+              <select class="unitSelect">
+                <option value="部" selected>部</option>
+                <option value="冊">冊</option>
+                <option value="点">点</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <button type="button" id="addDocBtn" class="btn-success">＋行追加</button>
+      </fieldset>
+
+      <div class="actions">
+        <button type="button" id="generateBtn" class="btn-primary">PDF生成</button>
+      </div>
+    </form>
+
+    <div id="previewArea" class="hidden">
+      <p>プレビュー領域(任意)</p>
+    </div>
+  </div>
+
+  <!-- レイアウト調整のためfooterタグ削除 -->
+
+<script>
+  const { jsPDF } = window.jspdf;
+
+    // DOMContentLoadedイベントリスナーを修正
+  window.addEventListener('DOMContentLoaded', () => {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    document.getElementById('sendDate').value = `${yyyy}-${mm}-${dd}`;
+
+    // ▼ 自社情報と同封物情報のみをlocalStorageで保持
+    loadMyCompanyInfo();
+    loadDocInfo();
+  });
+
+  // ローカルストレージへの保存・読込 (自社情報)
+  const selfFields = ['myCompany','myAddr','myTel','myDept','myTitle','myName'];
+  selfFields.forEach(id => {
+    document.getElementById(id).addEventListener('change', () => {
+      saveMyCompanyInfo();
+    });
+  });
+
+  function saveMyCompanyInfo() {
+    const data = {};
+    selfFields.forEach(id => {
+      data[id] = document.getElementById(id).value.trim();
+    });
+    localStorage.setItem("myCompanyInfo", JSON.stringify(data));
+  }
+
+  function loadMyCompanyInfo() {
+    const saved = localStorage.getItem("myCompanyInfo");
+    if (!saved) return;
+    const data = JSON.parse(saved);
+    selfFields.forEach(id => {
+      if(data[id]) {
+        document.getElementById(id).value = data[id];
+      }
+    });
+  }
+
+  // 同封物情報を保存・読み込み
+  function saveDocInfo() {
+    const docItems = [];
+    document.querySelectorAll('#docList .doc-item').forEach(item => {
+      const name = item.querySelector('.docName').value.trim();
+      const count = item.querySelector('.docCount').value || '1';
+      const unit = item.querySelector('.unitSelect').value;
+      if (name) {
+        docItems.push({ name, count, unit });
+      }
+    });
+    if (docItems.length > 0) {
+      localStorage.setItem("docItems", JSON.stringify(docItems));
+    }
+  }
+
+  function loadDocInfo() {
+    const saved = localStorage.getItem("docItems");
+    if (!saved) return;
+    
+    const docItems = JSON.parse(saved);
+    const docList = document.getElementById('docList');
+    
+    // 最初の1行は既にあるので2行目以降を作成
+    if (docItems.length > 0) {
+      // 最初の項目
+      const firstItem = docList.querySelector('.doc-item');
+      firstItem.querySelector('.docName').value = docItems[0].name;
+      firstItem.querySelector('.docCount').value = docItems[0].count;
+      firstItem.querySelector('.unitSelect').value = docItems[0].unit;
+      
+      // 2行目以降
+      for (let i = 1; i < docItems.length; i++) {
+        const div = document.createElement('div');
+        div.className = 'doc-item';
+        div.innerHTML = `
+          <input type="text" class="docName" placeholder="書類名" value="${docItems[i].name}" />
+          <div class="count-section">
+            <input type="number" class="docCount" placeholder="部数" min="1" value="${docItems[i].count}" />
+            <select class="unitSelect">
+              <option value="部" ${docItems[i].unit === '部' ? 'selected' : ''}>部</option>
+              <option value="冊" ${docItems[i].unit === '冊' ? 'selected' : ''}>冊</option>
+              <option value="点" ${docItems[i].unit === '点' ? 'selected' : ''}>点</option>
+            </select>
+          </div>
+        `;
+        docList.appendChild(div);
+      }
+    }
+  }
+
+  // 同封物入力項目変更時に保存
+  document.addEventListener('change', (e) => {
+    const target = e.target;
+    if (target.classList.contains('docName') || 
+        target.classList.contains('docCount') ||
+        target.classList.contains('unitSelect')) {
+      saveDocInfo();
+    }
+  });
+
+  // 同封物「＋行追加」
+  document.getElementById('addDocBtn').addEventListener('click', () => {
+    const docList = document.getElementById('docList');
+    const div = document.createElement('div');
+    div.className = 'doc-item';
+    div.innerHTML = `
+      <input type="text" class="docName" placeholder="書類名" />
+      <div class="count-section">
+        <input type="number" class="docCount" placeholder="部数" min="1" value="1" />
+        <select class="unitSelect">
+          <option value="部" selected>部</option>
+          <option value="冊">冊</option>
+          <option value="点">点</option>
+        </select>
+      </div>
+    `;
+    docList.appendChild(div);
+    
+    // 新しい行の入力項目に変更イベントリスナーを追加
+    div.querySelectorAll('.docName, .docCount, .unitSelect').forEach(el => {
+      el.addEventListener('change', saveDocInfo);
+    });
+  });
+
+  // 既存のターゲット情報を削除
+  localStorage.removeItem("targetInfo");
+
+  // テキスト折り返し関数
+  function splitTextToLines(text, pdf, maxWidth) {
+    const words = text.split(' ');
+    const lines = [];
+    let currentLine = '';
+
+    // 日本語テキストのため、文字単位で折り返し処理
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      const testLine = currentLine + char;
+      const testWidth = pdf.getStringUnitWidth(testLine) * pdf.getFontSize() / pdf.internal.scaleFactor;
+      
+      if (testWidth > maxWidth && currentLine !== '') {
+        lines.push(currentLine);
+        currentLine = char;
+      } else {
+        currentLine = testLine;
+      }
+    }
+    
+    // 最後の行を追加
+    if (currentLine !== '') {
+      lines.push(currentLine);
+    }
+    
+    return lines;
+  }
+
+  // PDF生成ボタン
+  document.getElementById('generateBtn').addEventListener('click', async () => {
+    const targetCompany = document.getElementById('targetCompany').value.trim();
+    const targetDept    = document.getElementById('targetDept').value.trim();
+    const targetTitle   = document.getElementById('targetTitle').value.trim();
+    const targetName    = document.getElementById('targetName').value.trim();
+
+    const myCompany = document.getElementById('myCompany').value.trim();
+    const myAddr    = document.getElementById('myAddr').value.trim();
+    const myTel     = document.getElementById('myTel').value.trim();
+    const myDept    = document.getElementById('myDept').value.trim(); 
+    const myTitle   = document.getElementById('myTitle').value.trim();
+    const myName    = document.getElementById('myName').value.trim();
+
+    const sendDate  = document.getElementById('sendDate').value;
+    const docTitle  = document.getElementById('docTitle').value.trim();
+
+    // 同封物情報の取得
+    let docInfos = [];
+    const items = document.querySelectorAll('#docList .doc-item');
+    items.forEach(item => {
+      const nameVal = item.querySelector('.docName').value.trim();
+      const countVal= item.querySelector('.docCount').value.trim() || '1';
+      const unitVal = item.querySelector('.unitSelect').value;
+      if(nameVal !== '') {
+        docInfos.push({ name: nameVal, count: countVal, unit: unitVal });
+      }
+    });
+
+    const pdf = new jsPDF({
+      unit: "mm",
+      format: "a4"
+    });
+
+    // 周囲余白の設定 - 日本の一般的な余白を考慮
+    const marginLeft = 25;  // 左余白を少し広げる
+    const marginRight = 25; // 右余白も少し広げる
+    const marginTop = 25;   // 上部余白を設定
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const effectiveWidth = pageWidth - marginLeft - marginRight;
+
+    // フォント読み込み
+    let fontData;
+    try {
+      fontData = await fetchMyFont();
+    } catch(e) {
+      console.error("フォント読み込み失敗:", e);
+      alert("フォントが読み込めませんでした。PDFが文字化けする可能性があります。");
+    }
+    if (fontData) {
+      pdf.addFileToVFS("myfont.ttf", fontData);
+      pdf.addFont("myfont.ttf", "MyMincho", "normal");
+      pdf.setFont("MyMincho", "normal");
+    } else {
+      pdf.setFont("helvetica", "normal");
+    }
+    pdf.setFontSize(12);
+
+    // 1. 修正: 右上の日付位置を下げる
+    if (sendDate) {
+      const dt = new Date(sendDate);
+      const dateStr = `${dt.getFullYear()}年${dt.getMonth()+1}月${dt.getDate()}日`;
+      pdf.text(dateStr, pageWidth - marginRight, marginTop, { align: "right" });
+    } else {
+      pdf.text("日付未入力", pageWidth - marginRight, marginTop, { align: "right" });
+    }
+
+    // 宛先を左寄せ - 日付より下の行から開始
+    // 空欄の場合は行を詰める
+    let targetLines = [];
+    if (targetCompany) targetLines.push(targetCompany);
+    if (targetDept) targetLines.push(targetDept);
+    // 役職と氏名の間のスペース調整（部署が空欄のとき）
+    if (targetTitle || targetName) {
+      let nameStr = "";
+      if (targetTitle) nameStr += targetTitle;
+      if (targetTitle && targetName) nameStr += "  "; // 役職と氏名の間にスペース
+      if (targetName) nameStr += targetName + " 様";
+      targetLines.push(nameStr);
+    }
+    
+    pdf.text(targetLines.join('\n'), marginLeft, marginTop + 10);
+
+    // 2. 修正: 自社情報を宛先より1行下から開始
+    // 空欄の場合は行を詰める
+    let selfInfoLines = [];
+    if (myCompany) selfInfoLines.push(myCompany);
+    if (myAddr) selfInfoLines.push(myAddr);
+    if (myTel) selfInfoLines.push("TEL: " + myTel);
+    if (myDept) selfInfoLines.push(myDept); // 「部署：」の文字を削除
+    
+    // 役職と氏名の間のスペース調整
+    let nameStr = "";
+    if (myTitle) nameStr += myTitle;
+    if (myTitle && myName) nameStr += " "; // 役職と氏名の間にスペース
+    if (myName) nameStr += myName;
+    if (nameStr) selfInfoLines.push(nameStr);
+    
+    pdf.text(selfInfoLines.join('\n'), pageWidth - marginRight, marginTop + 25, { align: "right" });
+
+    // タイトル
+    pdf.setFontSize(14);
+    pdf.text(docTitle || "書類送付について", pageWidth/2, marginTop + 60, { align: 'center' });
+
+    // 本文
+    pdf.setFontSize(12);
+    let linePos = marginTop + 70;
+    
+    // 「拝啓」
+    pdf.text("拝啓", marginLeft, linePos);
+    linePos += 7;
+    
+    // 挨拶文（長文のため折り返し処理）
+    const greetingText = "時下　ますますご清栄のこととお慶び申し上げます。平素より、格別のお引き立てを賜り厚く御礼申し上げます。";
+    const greetingLines = splitTextToLines(greetingText, pdf, effectiveWidth);
+    greetingLines.forEach(line => {
+      pdf.text(line, marginLeft, linePos);
+      linePos += 7;
+    });
+    
+    // 本文（長文のため折り返し処理）
+    const bodyText = "下記の通り書類を送付させていただきますので、ご査収の程、何卒よろしくお願い申し上げます。";
+    const bodyLines = splitTextToLines(bodyText, pdf, effectiveWidth);
+    bodyLines.forEach(line => {
+      pdf.text(line, marginLeft, linePos);
+      linePos += 7;
+    });
+
+    // 4. 修正: 「敬具」の位置を変更
+    pdf.text("敬具", pageWidth - marginRight, linePos, { align: "right" });
+    linePos += 7;
+    
+    // 「記」の前のスペース
+    pdf.text("記", pageWidth/2, linePos, { align: 'center' });
+    linePos += 10;
+    
+    // 3. 修正: 書類名と部数の間隔を調整
+    // 最長の書類名を見つける
+    let maxNameWidth = 0;
+    docInfos.forEach(doc => {
+      const nameWidth = pdf.getStringUnitWidth(doc.name) * pdf.getFontSize() / pdf.internal.scaleFactor;
+      if (nameWidth > maxNameWidth) {
+        maxNameWidth = nameWidth;
+      }
+    });
+    
+    // 書類名と部数の間隔を縮小
+    const minGap = 8; // より小さい間隔に調整
+    const countPosition = marginLeft + maxNameWidth + minGap;
+    
+    // 各同封物を書く - 間隔を調整
+    docInfos.forEach(doc => {
+      pdf.text(doc.name, marginLeft, linePos); // 書類名を左揃え
+      
+      // 部数と単位を調整した位置に配置
+      const countText = `${doc.count} ${doc.unit}`;
+      // 最大の書類名の長さ + minGap から部数を始める
+      pdf.text(countText, countPosition, linePos);
+      
+      linePos += 7;
+    });
+
+    linePos += 10;
+    // 4. 修正: 最後に「以上」を配置
+    pdf.text("以上", pageWidth - marginRight, linePos, { align: "right" });
+
+    pdf.save("送付状.pdf");
+  });
+
+  // 「myfont.txt」をfetchしてBase64文字列を返す関数
+  async function fetchMyFont() {
+    try {
+      const res = await fetch("/tools/myfont.txt");
+      if(!res.ok) throw new Error("myfont.txt読み込み失敗");
+      return await res.text();
+    } catch(e) {
+      console.error(e);
+      return null;
+    }
+  }
+</script>
+</body>
+</html>
