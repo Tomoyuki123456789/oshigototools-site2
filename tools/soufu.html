@@ -59,8 +59,16 @@ title: "送付状PDF生成ツール"
       color: #555;
     }
     
+    /* ラベルを入力欄と上下中央揃えにするための追記 */
+    .flex-row label {
+      margin-bottom: 0 !important;
+      display: flex;
+      align-items: center;
+    }
+
     input, textarea, select {
-      width: calc(100% - 110px);
+      /* 入力欄をより左に伸ばすために calc(100% - 110px) → calc(100% - 80px) に変更 */
+      width: calc(100% - 80px);
       margin-bottom: 10px;
       padding: 8px 12px;
       font-size: 14px;
@@ -185,12 +193,6 @@ title: "送付状PDF生成ツール"
     .hidden { 
       display: none; 
     }
-
-    /* 
-     * モバイル時の縦並びをなくし、 
-     * もともとの横並びを維持するため 
-     * @media (max-width: 600px) のブロックは削除しています
-     */
   </style>
 </head>
 <body>
@@ -249,15 +251,17 @@ title: "送付状PDF生成ツール"
         </div>
       </fieldset>
 
-      <!-- 日付＆タイトル -->
+      <!-- 日付＆題名 -->
       <fieldset>
-        <legend>書類タイトル＆日付</legend>
+        <!-- ここを「書類題名＆日付」に変更 -->
+        <legend>書類題名＆日付</legend>
         <div class="flex-row">
           <label>日付</label>
           <input type="date" id="sendDate" />
         </div>
         <div class="flex-row">
-          <label>タイトル</label>
+          <!-- ラベルを「題名」に変更 -->
+          <label>題名</label>
           <input type="text" id="docTitle" value="書類送付について" />
         </div>
       </fieldset>
@@ -286,7 +290,6 @@ title: "送付状PDF生成ツール"
       </div>
     </form>
 
-    <!-- PDF生成中に表示するメッセージ -->
     <div id="loadingMessage" class="hidden" style="text-align:center; margin-top:20px;">
       PDFを生成しています。しばらくお待ちください...
     </div>
@@ -532,11 +535,10 @@ title: "送付状PDF生成ツール"
     let targetLines = [];
     if (targetCompany) targetLines.push(targetCompany);
     if (targetDept) targetLines.push(targetDept);
-    // 役職と氏名の間のスペース調整（部署が空欄のとき）
     if (targetTitle || targetName) {
       let nameStr = "";
       if (targetTitle) nameStr += targetTitle;
-      if (targetTitle && targetName) nameStr += "  "; // 役職と氏名の間にスペース
+      if (targetTitle && targetName) nameStr += "  ";
       if (targetName) nameStr += targetName + " 様";
       targetLines.push(nameStr);
     }
@@ -544,7 +546,6 @@ title: "送付状PDF生成ツール"
     pdf.text(targetLines.join('\n'), marginLeft, marginTop + 10);
 
     // 2. 修正: 自社情報を宛先より1行下から開始
-    // 空欄の場合は行を詰める
     let selfInfoLines = [];
     if (myCompany) selfInfoLines.push(myCompany);
     if (myAddr) selfInfoLines.push(myAddr);
