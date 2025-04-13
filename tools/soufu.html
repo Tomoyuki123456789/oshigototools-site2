@@ -59,17 +59,10 @@ title: "送付状PDF生成ツール"
       color: #555;
     }
     
-    /* ラベルを入力欄と上下中央揃えにするための追記 */
-    .flex-row label {
-      margin-bottom: 0 !important;
-      display: flex;
-      align-items: center;
-    }
-
     input, textarea, select {
-      /* 入力欄をより左に伸ばすために calc(100% - 110px) → calc(100% - 80px) に変更 */
       width: calc(100% - 80px);
-      margin-bottom: 10px;
+      margin-top: 2px;
+      margin-bottom: 2px;
       padding: 8px 12px;
       font-size: 14px;
       border: 1px solid #ccc;
@@ -94,6 +87,9 @@ title: "送付状PDF生成ツール"
       width: auto;
       min-width: 100px;
       margin-bottom: 0;
+      /* ▼ ラベルの上下中央揃えをより確実にするため明示的に指定 ▼ */
+      display: flex !important; 
+      align-items: center !important;
     }
     
     .flex-row input[type="text"],
@@ -193,6 +189,27 @@ title: "送付状PDF生成ツール"
     .hidden { 
       display: none; 
     }
+
+    /* ▼▼▼ モバイル（max-width:600px）向け調整 ▼▼▼ */
+    @media (max-width: 600px) {
+      /* 1) .containerの横幅を端近くまで広げる＆パディング縮小 */
+      .container {
+        max-width: 100% !important;
+        margin: 0 5px !important;
+        padding: 10px !important;
+      }
+
+      /* 2) 入力欄を「社名」ラベルから約1全角スペースずらす */
+      .flex-row input,
+      .flex-row select,
+      .flex-row textarea {
+        margin-left: 1em;
+      }
+      .flex-row label {
+        min-width: 40px !important;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -253,14 +270,12 @@ title: "送付状PDF生成ツール"
 
       <!-- 日付＆題名 -->
       <fieldset>
-        <!-- ここを「書類題名＆日付」に変更 -->
         <legend>書類題名＆日付</legend>
         <div class="flex-row">
           <label>日付</label>
           <input type="date" id="sendDate" />
         </div>
         <div class="flex-row">
-          <!-- ラベルを「題名」に変更 -->
           <label>題名</label>
           <input type="text" id="docTitle" value="書類送付について" />
         </div>
