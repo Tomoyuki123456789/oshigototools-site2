@@ -185,43 +185,12 @@ title: "送付状PDF生成ツール"
     .hidden { 
       display: none; 
     }
-    
-    /* レスポンシブ対応 */
-    @media (max-width: 600px) {
-      .container {
-        padding: 15px;
-      }
-      
-      .flex-row {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      
-      .flex-row label {
-        width: 100%;
-        margin-bottom: 5px;
-      }
-      
-      .flex-row input[type="text"],
-      .flex-row input[type="date"],
-      .flex-row input[type="number"] {
-        width: 100%;
-      }
-      
-      .doc-item {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      
-      .doc-item input.docName {
-        width: 100%;
-      }
-      
-      .doc-item .count-section {
-        width: 100%;
-        justify-content: flex-start;
-      }
-    }
+
+    /* 
+     * モバイル時の縦並びをなくし、 
+     * もともとの横並びを維持するため 
+     * @media (max-width: 600px) のブロックは削除しています
+     */
   </style>
 </head>
 <body>
@@ -316,6 +285,11 @@ title: "送付状PDF生成ツール"
         <button type="button" id="generateBtn" class="btn-primary">PDF生成</button>
       </div>
     </form>
+
+    <!-- PDF生成中に表示するメッセージ -->
+    <div id="loadingMessage" class="hidden" style="text-align:center; margin-top:20px;">
+      PDFを生成しています。しばらくお待ちください...
+    </div>
 
     <div id="previewArea" class="hidden">
       <p>プレビュー領域(任意)</p>
@@ -485,6 +459,9 @@ title: "送付状PDF生成ツール"
 
   // PDF生成ボタン
   document.getElementById('generateBtn').addEventListener('click', async () => {
+    // ★ 生成中メッセージを表示
+    document.getElementById('loadingMessage').classList.remove('hidden');
+
     const targetCompany = document.getElementById('targetCompany').value.trim();
     const targetDept    = document.getElementById('targetDept').value.trim();
     const targetTitle   = document.getElementById('targetTitle').value.trim();
@@ -572,12 +549,11 @@ title: "送付状PDF生成ツール"
     if (myCompany) selfInfoLines.push(myCompany);
     if (myAddr) selfInfoLines.push(myAddr);
     if (myTel) selfInfoLines.push("TEL: " + myTel);
-    if (myDept) selfInfoLines.push(myDept); // 「部署：」の文字を削除
+    if (myDept) selfInfoLines.push(myDept);
     
-    // 役職と氏名の間のスペース調整
     let nameStr = "";
     if (myTitle) nameStr += myTitle;
-    if (myTitle && myName) nameStr += " "; // 役職と氏名の間にスペース
+    if (myTitle && myName) nameStr += " ";
     if (myName) nameStr += myName;
     if (nameStr) selfInfoLines.push(nameStr);
     
@@ -595,7 +571,7 @@ title: "送付状PDF生成ツール"
     pdf.text("拝啓", marginLeft, linePos);
     linePos += 7;
     
-    // 挨拶文（長文のため折り返し処理）
+    // 挨拶文
     const greetingText = "時下　ますますご清栄のこととお慶び申し上げます。平素より、格別のお引き立てを賜り厚く御礼申し上げます。";
     const greetingLines = splitTextToLines(greetingText, pdf, effectiveWidth);
     greetingLines.forEach(line => {
@@ -603,7 +579,7 @@ title: "送付状PDF生成ツール"
       linePos += 7;
     });
     
-    // 本文（長文のため折り返し処理）
+    // 本文
     const bodyText = "下記の通り書類を送付させていただきますので、ご査収の程、何卒よろしくお願い申し上げます。";
     const bodyLines = splitTextToLines(bodyText, pdf, effectiveWidth);
     bodyLines.forEach(line => {
@@ -615,12 +591,11 @@ title: "送付状PDF生成ツール"
     pdf.text("敬具", pageWidth - marginRight, linePos, { align: "right" });
     linePos += 7;
     
-    // 「記」の前のスペース
+    // 「記」
     pdf.text("記", pageWidth/2, linePos, { align: 'center' });
     linePos += 10;
     
     // 3. 修正: 書類名と部数の間隔を調整
-    // 最長の書類名を見つける
     let maxNameWidth = 0;
     docInfos.forEach(doc => {
       const nameWidth = pdf.getStringUnitWidth(doc.name) * pdf.getFontSize() / pdf.internal.scaleFactor;
@@ -628,28 +603,24 @@ title: "送付状PDF生成ツール"
         maxNameWidth = nameWidth;
       }
     });
-    
-    // 書類名と部数の間隔を縮小
-    const minGap = 8; // より小さい間隔に調整
+    const minGap = 8;
     const countPosition = marginLeft + maxNameWidth + minGap;
     
-    // 各同封物を書く - 間隔を調整
     docInfos.forEach(doc => {
-      pdf.text(doc.name, marginLeft, linePos); // 書類名を左揃え
-      
-      // 部数と単位を調整した位置に配置
+      pdf.text(doc.name, marginLeft, linePos);
       const countText = `${doc.count} ${doc.unit}`;
-      // 最大の書類名の長さ + minGap から部数を始める
       pdf.text(countText, countPosition, linePos);
-      
       linePos += 7;
     });
 
     linePos += 10;
-    // 4. 修正: 最後に「以上」を配置
+    // 最後に「以上」
     pdf.text("以上", pageWidth - marginRight, linePos, { align: "right" });
 
     pdf.save("送付状.pdf");
+
+    // ★ 生成完了後にメッセージを非表示
+    document.getElementById('loadingMessage').classList.add('hidden');
   });
 
   // 「myfont.txt」をfetchしてBase64文字列を返す関数
