@@ -225,13 +225,150 @@ title: "カレンダー時刻選択ツール"
     visibility: visible !important;
     opacity: 1 !important;
   }
+
+  .title-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+}
+
+.help-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #007BFF;
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.help-tooltip {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  z-index: 1000;
+  max-width: 510px; /* container幅に合わせる */
+  font-size: 14px;
+  line-height: 1.4;
+  top: 70px; /* タイトルエリアの下に配置 */
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: left;
+}
+
+@media (max-width: 768px) {
+  .help-tooltip {
+    width: calc(100% - 20px);
+    max-width: none;
+  }
+}
+
+.help-tooltip.active {
+  display: block;
+}
+
+.help-tooltip ul {
+  margin: 8px 0 8px 20px;
+  padding: 0;
+}
+
+.help-tooltip li {
+  margin-bottom: 6px;
+}
+
+.help-tooltip h4 {
+  margin: 10px 0 5px 0;
+}
+
+/* ヘッダー位置調整 */
+header {
+  text-align: center;
+  margin-bottom: 5px;
+  position: relative; /* トゥールチップ配置用 */
+}
+
+/* ヘルプアイコンの色と配置の修正 */
+.help-icon {
+  background-color: #999 !important; /* 灰色に変更・上書き */
+}
+
+/* タイトルコンテナとタイトルテキストの調整 */
+.title-container {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 0 !important; /* 余白をリセット */
+  padding: 0 !important; /* 余白をリセット */
+}
+
+/* タイトルの余白を調整 */
+.title-text {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* ヘッダーの余白を最小化 */
+header {
+  margin-bottom: 5px !important;
+  padding: 0 !important;
+}
+
+/* ヘルプアイコンを絶対位置で配置 */
+.title-container .help-icon {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* モバイル用の調整 */
+@media (max-width: 768px) {
+  .title-container {
+    padding: 0 25px !important; /* ヘルプアイコン用の余白 */
+  }
+}
+
+/* PC用の幅調整 */
+@media (min-width: 769px) {
+  .title-container {
+    width: 510px;
+    margin: 0 auto !important;
+  }
+}
 </style>
 
-<!-- ヘッダー（画像なし版） -->
 <header>
-  <h1 style="font-size: 21px; text-align: center; margin: 0;">
-    カレンダー時刻選択ツール
-  </h1>
+  <div class="title-container">
+    <h1 class="title-text" style="font-size: 21px;">
+      カレンダー時刻選択ツール
+    </h1>
+    <div class="help-icon" id="helpIcon">?</div>
+  </div>
+  <div class="help-tooltip" id="helpTooltip">
+    <h4>使い方</h4>
+    <ul>
+      <li><strong>日付選択：</strong>カレンダーから日付をクリックして選択します。</li>
+      <li><strong>時間選択：</strong>右側のリストから時間を選びます。最初に選んだ時間が開始時間、次に選んだ時間が終了時間になります。</li>
+      <li><strong>複数時間帯：</strong>1日に複数の時間帯を追加できます。</li>
+      <li><strong>月の切り替え：</strong>カレンダー上部の「＜」「＞」ボタンで月を移動できます。</li>
+    </ul>
+    <h4>操作</h4>
+    <ul>
+      <li><strong>COPY：</strong>結果をクリップボードにコピーします。</li>
+      <li><strong>RESET：</strong>すべての選択をリセットします。</li>
+    </ul>
+  </div>
 </header>
 
 <!-- カレンダー & 時刻セレクタ部分 -->
@@ -527,4 +664,24 @@ title: "カレンダー時刻選択ツール"
   updateMonthDisplay();
   generateCalendar(currentYearMonth);
   generateTimeOptions();
+
+const helpIcon = document.getElementById("helpIcon");
+const helpTooltip = document.getElementById("helpTooltip");
+
+helpIcon.addEventListener("click", function(e) {
+  e.stopPropagation();
+  helpTooltip.classList.toggle("active");
+});
+
+// Close tooltip when clicking elsewhere
+document.addEventListener("click", function(e) {
+  if (helpTooltip.classList.contains("active") && 
+      e.target !== helpIcon && 
+      !helpTooltip.contains(e.target)) {
+    helpTooltip.classList.remove("active");
+  }
+});
+
+
+
 </script>

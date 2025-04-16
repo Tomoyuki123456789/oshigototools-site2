@@ -210,13 +210,100 @@ title: "送付状PDF生成ツール"
       }
     }
 
+  /* ヘルプアイコンとタイトルのスタイル */
+  .title-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+
+  h1 {
+    font-size: 1.2rem !important; /* タイトルを2/3に縮小 */
+    margin: 0 !important;
+    text-align: center;
+  }
+
+  .help-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #999;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    user-select: none;
+    position: absolute;
+    right: 0;
+  }
+
+  .help-tooltip {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    z-index: 1000;
+    max-width: 100%;
+    font-size: 14px;
+    line-height: 1.4;
+    top: 30px;
+    left: 0;
+    right: 0;
+    text-align: left;
+  }
+
+  .help-tooltip.active {
+    display: block;
+  }
+
+  .help-tooltip ul {
+    margin: 8px 0 8px 20px;
+    padding: 0;
+  }
+
+  .help-tooltip li {
+    margin-bottom: 6px;
+  }
+
+  .help-tooltip h4 {
+    margin: 10px 0 5px 0;
+  }
+
+  .title-container {
+  margin-bottom: 20px !important; /* 30pxから20pxに縮小（約2/3） */
+  }
   </style>
 </head>
 <body>
   <!-- レイアウト調整のためheaderタグ削除 -->
 
   <div class="container">
-    <h1>書類送付状PDF生成ツール</h1>
+    <div class="title-container">
+      <h1>書類送付状PDF生成ツール</h1>
+      <div class="help-icon" id="helpIcon">?</div>
+      <div class="help-tooltip" id="helpTooltip">
+        <h4>使い方</h4>
+        <ul>
+          <li><strong>宛先情報：</strong>送付状の宛先となる会社名や担当者名を入力します。</li>
+          <li><strong>自社情報：</strong>送付元の情報を入力します。一度入力すると保存されます。</li>
+          <li><strong>書類題名＆日付：</strong>送付状の日付と題名を設定します。</li>
+          <li><strong>同封物一覧：</strong>送付する書類とその部数を入力します。「＋行追加」で複数の書類を追加できます。</li>
+        </ul>
+        <h4>操作</h4>
+        <ul>
+          <li><strong>PDF生成：</strong>入力した情報をもとにPDFを生成します。自動的にダウンロードが始まります。</li>
+          <li><strong>自動保存：</strong>自社情報と同封物情報は自動的に保存され、次回使用時に読み込まれます。</li>
+        </ul>
+      </div>
+    </div>
     <form id="soufuForm">
       <!-- 宛先情報 -->
       <fieldset>
@@ -650,6 +737,23 @@ title: "送付状PDF生成ツール"
       return null;
     }
   }
+
+  const helpIcon = document.getElementById("helpIcon");
+const helpTooltip = document.getElementById("helpTooltip");
+
+helpIcon.addEventListener("click", function(e) {
+  e.stopPropagation();
+  helpTooltip.classList.toggle("active");
+});
+
+// ツールチップの外をクリックしたら閉じる
+document.addEventListener("click", function(e) {
+  if (helpTooltip.classList.contains("active") && 
+      e.target !== helpIcon && 
+      !helpTooltip.contains(e.target)) {
+    helpTooltip.classList.remove("active");
+  }
+});
 </script>
 </body>
 </html>
