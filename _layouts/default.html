@@ -51,7 +51,15 @@
   
   <!-- 共通スタイル -->
   <link rel="stylesheet" href="/css/common.css">
-  
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="96x96" href="{{ "/favicon/favicon-96x96.png" | relative_url }}">
+  <link rel="icon" type="image/svg+xml" href="{{ "/favicon/favicon.svg" | relative_url }}">
+  <link rel="shortcut icon" href="{{ "/favicon/favicon.ico" | relative_url }}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ "/favicon/apple-touch-icon.png" | relative_url }}">
+  <meta name="apple-mobile-web-app-title" content="oshigoto">
+  <link rel="manifest" href="{{ "/favicon/site.webmanifest" | relative_url }}">
+
   <!-- ページ固有スタイル（必要なら各ページで front matter に "styles" 変数を設定） -->
   {{ page.styles }}
 </head>
