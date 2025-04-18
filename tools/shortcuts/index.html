@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ショートカットキー検索ツール</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; 
+      background: #f7f9fc; 
+      padding: 20px;
+      color: #333;
+    }
+    .container {
+      width: 100%; max-width: 1200px;
+      margin: 0 auto; padding: 30px;
+      background: #fff; border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+    h1 {
+      text-align: center; margin-bottom: 30px;
+      color: #2c3e50; font-weight: 600;
+      font-size: 2.2rem;
+    }
+
+    .controls {
+      display: flex; align-items: center;
+      gap: 15px; margin-bottom: 30px;
+      flex-wrap: wrap; justify-content: center;
+    }
+    .controls label {
+      font-weight: 600; color: #2c3e50;
+      margin-right: 5px;
+    }
+    .platform-selector {
+      display: flex;
+      gap: 5px;
+      background: #f0f4f8;
+      border-radius: 8px;
+      padding: 5px;
+      margin-right: 10px;
+    }
+    .platform-btn {
+      padding: 8px 16px;
+      font-size: 14px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: #606060;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .platform-btn:hover {
+      background: rgba(52, 152, 219, 0.1);
+    }
+    .platform-btn.active {
+      background: #3498db;
+      color: white;
+      box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+    }
+    .fav-btn {
+      padding: 8px 16px;
+      font-size: 14px;
+      border: none;
+      border-radius: 6px;
+      background: #f0f4f8;
+      color: #606060;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .fav-btn:hover {
+      background: rgba(243, 156, 18, 0.1);
+    }
+    .fav-btn.active {
+      background: #f39c12;
+      color: white;
+      box-shadow: 0 2px 8px rgba(243, 156, 18, 0.3);
+    }
+    .fav-icon {
+      font-size: 18px;
+      position: relative;
+      top: -1px;
+    }
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    .panel {
+      position: relative; padding: 20px;
+      border-radius: 10px;
+      background: #fff;
+      box-shadow: 0 3px 15px rgba(0,0,0,0.05);
+      transition: all 0.3s ease;
+      border: 1px solid #eaeff4;
+    }
+    .panel:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+    .panel .star {
+      position: absolute; top: 15px; right: 15px;
+      font-size: 22px; cursor: pointer;
+      color: #ddd; transition: all 0.2s;
+    }
+    .panel:hover .star {
+      color: #ccc;
+    }
+    .panel .star.favorited {
+      color: #f39c12;
+    }
+    .panel strong {
+      display: block; margin-bottom: 12px;
+      color: #2c3e50; font-size: 16px;
+      font-weight: 600;
+    }
+    .panel .keys {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    .key {
+      padding: 4px 8px;
+      background: #f0f4f8;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #34495e;
+      border: 1px solid #dfe6e9;
+    }
+    
+    .no-results {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 40px;
+      color: #7f8c8d;
+      font-size: 16px;
+    }
+    
+    /* Animation for panels */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .panel {
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+    
+    @media (max-width: 768px) {
+      .container { padding: 20px; }
+      h1 { font-size: 1.8rem; }
+      .controls { 
+        flex-direction: column; 
+        align-items: stretch;
+      }
+      .platform-selector {
+        overflow-x: auto;
+        justify-content: flex-start;
+        margin-right: 0;
+      }
+      .search-box {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>ショートカットキー検索ツール</h1>
+    <div class="controls">
+      <div class="platform-selector">
+        <button class="platform-btn active" data-platform="windows">Windows</button>
+        <button class="platform-btn" data-platform="mac">Mac</button>
+        <button class="platform-btn" data-platform="excel">Excel</button>
+        <button class="platform-btn" data-platform="googlespreadsheet">Google Sheet</button>
+      </div>
+      
+      <button id="toggleFav" class="fav-btn">
+        <span class="fav-icon">☆</span>
+        <span class="btn-text">お気に入りのみ</span>
+      </button>
+    </div>
+    
+    <div class="grid-container" id="grid"></div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const grid = document.getElementById('grid');
+      const favBtn = document.getElementById('toggleFav');
+      const platformBtns = document.querySelectorAll('.platform-btn');
+      
+      let shortcuts = {};
+      let currentPlatform = 'windows';
+      let showingFavsOnly = false;
+      let favs = JSON.parse(localStorage.getItem('shortcut_favorites') || '[]');
+
+      // JSONデータをロード
+      fetch('shortcuts.json')
+        .then(res => res.json())
+        .then(data => {
+          shortcuts = data;
+          renderGrid();
+        })
+        .catch(err => {
+          console.error('データ読み込みエラー:', err);
+          grid.innerHTML = '<div class="no-results">ショートカットデータを読み込めませんでした。</div>';
+        });
+
+      // プラットフォーム選択ボタンのイベント
+      platformBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          platformBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentPlatform = btn.getAttribute('data-platform');
+          renderGrid();
+        });
+      });
+
+      // お気に入りのみ表示トグル
+      favBtn.addEventListener('click', () => {
+        favBtn.classList.toggle('active');
+        showingFavsOnly = favBtn.classList.contains('active');
+        
+        const btnIcon = favBtn.querySelector('.fav-icon');
+        const btnText = favBtn.querySelector('.btn-text');
+        
+        if (showingFavsOnly) {
+          btnIcon.textContent = '★';
+          btnText.textContent = '全て表示';
+        } else {
+          btnIcon.textContent = '☆';
+          btnText.textContent = 'お気に入りのみ';
+        }
+        
+        renderGrid();
+      });
+      
+      // グリッドの描画
+      function renderGrid() {
+        const list = shortcuts[currentPlatform] || [];
+        
+        // フィルタリング
+        let displayList = list;
+        
+        // お気に入りフィルター
+        if (showingFavsOnly) {
+          displayList = displayList.filter(item => favs.includes(item.action));
+        }
+
+        // グリッドの描画
+        if (displayList.length === 0) {
+          grid.innerHTML = '<div class="no-results">該当するショートカットが見つかりません</div>';
+        } else {
+          grid.innerHTML = displayList.map((item, index) => {
+            const isFav = favs.includes(item.action);
+            // アニメーションの遅延を追加
+            const delay = Math.min(index * 30, 300);
+            
+            return `
+              <div class="panel" data-action="${item.action}" style="animation-delay: ${delay}ms">
+                <div class="star ${isFav ? 'favorited' : ''}">★</div>
+                <strong>${item.action}</strong>
+                <div class="keys">
+                  ${item.keys.map(key => `<span class="key">${key}</span>`).join('')}
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+
+        // 星クリックでお気に入りの追加／削除
+        grid.querySelectorAll('.panel .star').forEach(star => {
+          star.addEventListener('click', e => {
+            e.stopPropagation();
+            const action = e.currentTarget.parentElement.getAttribute('data-action');
+            
+            if (favs.includes(action)) {
+              favs = favs.filter(a => a !== action);
+              e.currentTarget.classList.remove('favorited');
+            } else {
+              favs.push(action);
+              e.currentTarget.classList.add('favorited');
+            }
+            
+            localStorage.setItem('shortcut_favorites', JSON.stringify(favs));
+            
+            // お気に入りのみ表示時に、お気に入りから削除した場合は再描画
+            if (showingFavsOnly) {
+              renderGrid();
+            }
+          });
+        });
+      }
+    });
+  </script>
+</body>
+</html>
