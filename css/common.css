@@ -19,7 +19,7 @@
   --base-line-height: 1.8;
   
   /* フォントサイズ */
-  --h1-size: 28px;
+  --h1-size: 22px;
   --h1-size-sm: 22px;
   --font-size-base: 16px;
   --fs-lg: 20px;
@@ -32,7 +32,7 @@
   
   /* 余白 */
   --space-xs: 5px;
-  --space-sm: 10px;
+  --space-sm: 5px;
   --space-md: 20px;
   --space-lg: 40px;
   
