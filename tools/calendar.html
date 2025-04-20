@@ -212,10 +212,12 @@ keywords: "カレンダー, 時刻選択, スケジュール, 会議調整, 予�
     transition: background-color 0.2s, color 0.2s;
   }
   
-  .time-option:hover {
-    background-color: var(--calendar-hover);
+    @media (hover: hover) and (pointer: fine) {
+    .time-option:hover {
+      background-color: var(--calendar-hover);
+    }
   }
-  
+    
   .selected-time {
     background-color: var(--calendar-selected) !important;
     color: white !important;
