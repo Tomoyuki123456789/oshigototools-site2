@@ -1,106 +1,151 @@
 ---
 layout: default
 title: "カレンダー時刻選択ツール"
+description: "会議やイベントの日時を簡単に選択・コピーできる便利ツール"
+keywords: "カレンダー, 時刻選択, スケジュール, 会議調整, 予定"
 ---
-<!-- ページ固有のスタイル：PC幅510px＋margin auto、モバイルは100vw -->
+
+<!-- カレンダー時刻選択ツール用のスタイル -->
 <style>
+  /* ベース設定 */
+  * {
+    box-sizing: border-box;
+  }
+
+  /* カスタムカラー設定 */
+  :root {
+    --calendar-saturday: rgba(0, 94, 153, 0.15); /* プライマリーカラーの薄い色 */
+    --calendar-sunday: rgba(255, 102, 102, 0.15); /* 柔らかい赤 */
+    --calendar-today: rgba(0, 94, 153, 0.08); /* さらに薄いプライマリーカラー */
+    --calendar-hover: rgba(0, 94, 153, 0.25); /* ホバー用の明るめのプライマリーカラー */
+    --calendar-selected: rgba(0, 94, 153, 0.8); /* 選択用の濃いめのプライマリーカラー */
+    --calendar-header: rgba(0, 94, 153, 0.2); /* ヘッダー用の薄めのプライマリーカラー */
+  }
+  
   /* PC版（769px以上） */
   @media (min-width: 769px) {
+    .calendar-container {
+      width: 370px; 
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: var(--shadow);
+      background-color: #fff;
+    }
+    
     .container {
-      /* ▼ 変更：20px → 5px */
       width: 510px;
-      margin: 5px auto; /* カレンダーと文字の余白を小さく */
+      margin: 5px auto;
       display: flex;
       gap: 20px;
       flex-wrap: wrap;
       align-items: flex-start;
     }
+    
     .result-area {
-      width: 510px; /* カレンダー(370) + gap(20) + time-select(120) = 510 */
-      margin: 10px auto 0; /* 上下に余白 */
+      width: 510px;
+      margin: 10px auto 0;
     }
+    
     .result-area textarea {
       width: 510px;
       height: 150px;
-      /* ▼ 追加: フォントサイズをtime-optionと同じ14pxに */
-      font-size: 14px; 
+      font-size: 14px;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      background-color: #fff;
     }
-    .btn-area {
-      margin-top: 10px;
-      display: flex;
-      justify-content: center;
-      gap: 10px;
+    
+    .time-select {
+      width: 120px;
     }
   }
 
   /* モバイル（768px以下） */
   @media (max-width: 768px) {
+    .calendar-container {
+      width: calc(100% - 90px - 10px);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: var(--shadow);
+      background-color: #fff;
+    }
+    
     .container {
-      width: 100%;  /* 100%に変更 */
+      width: 100%;
       margin: 0 auto;
       display: flex;
       flex-direction: row;
       gap: 10px;
-      justify-content: center; /* 中央寄せを追加 */
+      justify-content: center;
       overflow-x: hidden;
       align-items: flex-start;
-      padding: 0 5px; /* 左右に少しだけパディングを追加 */
+      padding: 0 5px;
     }
-    .calendar-container {
-      width: calc(100% - 90px - 10px); /* 100%ベースに変更 */
-    }
+    
     .result-area {
-      width: 100%; /* 100%に変更 */
+      width: 100%;
       margin: 10px auto 0;
-      padding: 0 5px; /* 左右に少しパディングを追加 */
+      padding: 0 5px;
     }
+    
     .result-area textarea {
-      width: 100%; /* 100%に変更 */
+      width: 100%;
       height: 100px;
-      /* ▼ 追加: フォントサイズをtime-optionと同じ14pxに */
-      font-size: 14px; 
+      font-size: 14px;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      background-color: #fff;
     }
-    .btn-area {
-      flex-direction: row;
-      justify-content: center;
-      gap: 10px;
+    
+    .time-select {
+      width: 80px;
     }
   }
 
-  .calendar-container {
-    border: 1px solid #ccc;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    width: 370px; 
-    position: relative;
-    box-sizing: border-box; /* ボックスサイズ計算を追加 */
-  }
+  /* 共通スタイル */
   .time-select {
-    width: 80px; /* モバイルでは少し狭く */
-    border: 1px solid #ccc;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
     box-shadow:
       inset 0 -6px 6px -6px rgba(0,0,0,0.15),
       inset 0 6px 6px -6px rgba(0,0,0,0.15);
     overflow-y: auto;
-    box-sizing: border-box; /* ボックスサイズ計算を追加 */
+    background-color: #fff;
   }
-  @media (min-width: 769px) {
-    .time-select {
-      width: 120px; /* PC版では元の幅 */
-    }
-  }
+  
   .month-select {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
   }
+  
   .nav-btn {
     width: 60px;
     height: 40px;
     font-size: 16px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background-color 0.2s;
   }
+  
+  .nav-btn:hover {
+    background-color: var(--primary-dark);
+  }
+  
   .month-display {
     height: 40px;
     line-height: 40px;
@@ -108,82 +153,107 @@ title: "カレンダー時刻選択ツール"
     text-align: center;
     flex: 1;
     margin: 0 8px;
+    color: var(--primary-color);
+    font-weight: bold;
   }
+  
   .calendar-container table {
     border-collapse: collapse;
     width: 100%;
   }
+  
   .calendar-container th,
   .calendar-container td {
-    width: 14.28%; /* テーブルセルを均等割り */
+    width: 14.28%;
     height: 40px;
     text-align: center;
     vertical-align: middle;
     cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
   }
+  
   .calendar-container th {
-    background-color: #f0f0f0;
+    background-color: var(--calendar-header);
+    color: var(--primary-color);
+    font-weight: bold;
   }
+  
   .calendar-container td:hover {
-    background-color: #d0f0ff;
+    background-color: var(--calendar-hover);
   }
+  
   .selected-date {
-    background-color: #a0e0ff !important;
+    background-color: var(--calendar-selected) !important;
+    color: white !important;
   }
+  
   .adjacent-month {
     color: #999;
   }
+  
   .today {
-    background-color: #eee !important;
+    background-color: var(--calendar-today) !important;
+    font-weight: bold;
   }
+  
   .saturday {
-    background-color: #e0f7ff;
+    background-color: var(--calendar-saturday);
   }
+  
   .sunday {
-    background-color: #ffe0e0;
+    background-color: var(--calendar-sunday);
   }
+  
   .time-option {
     font-size: 14px;
     padding: 6px 0;
     text-align: center;
     white-space: nowrap;
+    transition: background-color 0.2s, color 0.2s;
   }
+  
   .time-option:hover {
-    background-color: #d0f0ff;
+    background-color: var(--calendar-hover);
   }
+  
   .selected-time {
-    background-color: #a0e0ff !important;
+    background-color: var(--calendar-selected) !important;
+    color: white !important;
   }
+  
   .btn-area {
     margin-top: 10px;
     display: flex;
     gap: 10px;
+    justify-content: center;
   }
-
-  /* ▼▼▼ ① ボタンのテキストを縦中央にする ▼▼▼ */
-  button {
+  
+  .btn-area button {
     cursor: pointer;
     padding: 8px 16px;
-    height: 30px; /* 高さを明示的に指定 */
-    box-sizing: border-box; /* パディングを含めた高さ計算 */
+    height: 36px;
+    box-sizing: border-box;
     display: flex;
     justify-content: center;
     align-items: center;
-    
-    /* ▼ 追加 ▼ */
-    -webkit-appearance: none; /* iOS Safari など */
-    border-radius: 0;         /* 押下時にも角丸にしない */
+    -webkit-appearance: none;
+    border-radius: var(--radius);
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    transition: background-color 0.2s;
+    font-size: 14px;
+    font-weight: bold;
   }
-
-  /* すべての要素にボックスサイジングを適用 */
-  * {
-    box-sizing: border-box;
+  
+  .btn-area button:hover {
+    background-color: var(--primary-dark);
   }
 
   .tooltip {
-    position: relative !important; /* !importantを追加 */
+    position: relative !important;
     display: inline-block;
-    height: 30px;
+    height: 36px;
     vertical-align: top;
   }
 
@@ -197,16 +267,16 @@ title: "カレンダー時刻選択ツール"
     background-color: rgba(0, 0, 0, 0.7);
     color: #fff;
     text-align: center;
-    border-radius: 6px;
+    border-radius: var(--radius);
     padding: 5px;
-    position: absolute !important; /* !importantを追加 */
-    z-index: 9999 !important; /* より高いz-indexを設定 */
+    position: absolute !important;
+    z-index: 9999 !important;
     top: -40px;
     left: 50%;
     margin-left: -70px;
     opacity: 0;
-    transition: none; 
-    pointer-events: none; /* ホバーの問題を防止 */
+    transition: opacity 0.3s;
+    pointer-events: none;
   }
 
   .tooltip .tooltip-text::after {
@@ -220,141 +290,98 @@ title: "カレンダー時刻選択ツール"
     border-color: rgba(0, 0, 0, 0.7) transparent transparent transparent;
   }
 
-  /* showクラスをより強力に */
   .tooltip .tooltip-text.show {
     visibility: visible !important;
     opacity: 1 !important;
   }
 
-  .title-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0;
-}
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    position: relative;
+  }
 
-.help-icon {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background-color: #007BFF;
-  color: white;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: 8px;
-  font-size: 14px;
-  cursor: pointer;
-  user-select: none;
-}
+  .help-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 10px;
+    font-size: 14px;
+    cursor: pointer;
+    user-select: none;
+    position: absolute;
+    right: 0;
+    opacity: 0.8;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  
+  .help-icon:hover {
+    opacity: 1;
+    transform: scale(1.05);
+  }
 
-.help-tooltip {
-  display: none;
-  position: absolute;
-  background-color: #f9f9f9;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  z-index: 1000;
-  max-width: 510px; /* container幅に合わせる */
-  font-size: 14px;
-  line-height: 1.4;
-  top: 70px; /* タイトルエリアの下に配置 */
-  left: 50%;
-  transform: translateX(-50%);
-  text-align: left;
-}
+  @media (min-width: 769px) {
+    .page-header {
+      width: 510px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
 
-@media (max-width: 768px) {
   .help-tooltip {
-    width: calc(100% - 20px);
-    max-width: none;
+    display: none;
+    position: absolute;
+    background-color: white;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 15px;
+    box-shadow: var(--shadow);
+    z-index: 1000;
+    max-width: 510px;
+    font-size: 14px;
+    line-height: 1.5;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: left;
   }
-}
 
-.help-tooltip.active {
-  display: block;
-}
-
-.help-tooltip ul {
-  margin: 8px 0 8px 20px;
-  padding: 0;
-}
-
-.help-tooltip li {
-  margin-bottom: 6px;
-}
-
-.help-tooltip h4 {
-  margin: 10px 0 5px 0;
-}
-
-/* ヘッダー位置調整 */
-header {
-  text-align: center;
-  margin-bottom: 5px;
-  position: relative; /* トゥールチップ配置用 */
-}
-
-/* ヘルプアイコンの色と配置の修正 */
-.help-icon {
-  background-color: #999 !important; /* 灰色に変更・上書き */
-}
-
-/* タイトルコンテナとタイトルテキストの調整 */
-.title-container {
-  position: relative;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  margin: 0 !important; /* 余白をリセット */
-  padding: 0 !important; /* 余白をリセット */
-}
-
-/* タイトルの余白を調整 */
-.title-text {
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-/* ヘッダーの余白を最小化 */
-header {
-  margin-bottom: 5px !important;
-  padding: 0 !important;
-}
-
-/* ヘルプアイコンを絶対位置で配置 */
-.title-container .help-icon {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-/* モバイル用の調整 */
-@media (max-width: 768px) {
-  .title-container {
-    padding: 0 25px !important; /* ヘルプアイコン用の余白 */
+  @media (max-width: 768px) {
+    .help-tooltip {
+      width: calc(100% - 20px);
+      max-width: none;
+    }
   }
-}
 
-/* PC用の幅調整 */
-@media (min-width: 769px) {
-  .title-container {
-    width: 510px;
-    margin: 0 auto !important;
+  .help-tooltip.active {
+    display: block;
   }
-}
+
+  .help-tooltip ul {
+    margin: 8px 0 8px 20px;
+    padding: 0;
+  }
+
+  .help-tooltip li {
+    margin-bottom: 8px;
+  }
+
+  .help-tooltip h4 {
+    margin: 12px 0 8px 0;
+    color: var(--primary-color);
+  }
 </style>
 
-<header>
-  <div class="title-container">
-    <h1 class="title-text" style="font-size: 21px;">
-      カレンダー時刻選択ツール
-    </h1>
-    <div class="help-icon" id="helpIcon">?</div>
-  </div>
+<div class="page-header">
+  <h1>カレンダー時刻選択ツール</h1>
+  <div class="help-icon" id="helpIcon">?</div>
   <div class="help-tooltip" id="helpTooltip">
     <h4>使い方</h4>
     <ul>
@@ -369,7 +396,7 @@ header {
       <li><strong>RESET：</strong>すべての選択をリセットします。</li>
     </ul>
   </div>
-</header>
+</div>
 
 <!-- カレンダー & 時刻セレクタ部分 -->
 <div class="container" id="topContainer">
@@ -386,7 +413,7 @@ header {
 
 <!-- 結果表示部分 -->
 <div class="result-area">
-  <textarea id="resultText"></textarea>
+  <textarea id="resultText" placeholder="日付と時間を選択すると、ここに結果が表示されます"></textarea>
   <div class="btn-area">
     <div class="tooltip">
       <button id="copyBtn">COPY</button>
@@ -592,8 +619,10 @@ header {
         // 開始～終了のペアを決定
         if (timesAreComplete(currentEntry.times)) {
           currentEntry.times.push({ start: timeStr, end: "" });
+          div.classList.add("selected-time");
         } else {
           currentEntry.times[currentEntry.times.length - 1].end = timeStr;
+          div.classList.add("selected-time");
         }
         updateCurrentEntryLine();
       });
@@ -622,66 +651,61 @@ header {
     generateCalendar(currentYearMonth);
   });
   document.getElementById("copyBtn").addEventListener("click", () => {
-  const tooltip = document.getElementById("copyTooltip");
-  
-  navigator.clipboard.writeText(resultText.value)
-    .then(() => {
-      // DOMを強制的に更新
-      tooltip.style.visibility = "visible";
-      tooltip.style.opacity = "1";
-      tooltip.classList.add("show");
-      
-      // 2秒後に非表示
-      setTimeout(() => {
-        tooltip.classList.remove("show");
-        tooltip.style.visibility = "hidden";
-        tooltip.style.opacity = "0";
-      }, 2000);
-    })
-    .catch(err => { 
-      console.error("コピーに失敗:", err);
-      tooltip.textContent = "コピーに失敗しました";
-      tooltip.style.visibility = "visible";
-      tooltip.style.opacity = "1";
-      tooltip.classList.add("show");
-      
-      setTimeout(() => {
-        tooltip.classList.remove("show");
-        tooltip.style.visibility = "hidden";
-        tooltip.style.opacity = "0";
-        tooltip.textContent = "コピーしました！"; // テキストを元に戻す
-      }, 2000);
-    });
-});
+    const tooltip = document.getElementById("copyTooltip");
+    
+    navigator.clipboard.writeText(resultText.value)
+      .then(() => {
+        // ツールチップを表示
+        tooltip.classList.add("show");
+        
+        // 2秒後に非表示
+        setTimeout(() => {
+          tooltip.classList.remove("show");
+        }, 2000);
+      })
+      .catch(err => { 
+        console.error("コピーに失敗:", err);
+        tooltip.textContent = "コピーに失敗しました";
+        tooltip.classList.add("show");
+        
+        setTimeout(() => {
+          tooltip.classList.remove("show");
+          tooltip.textContent = "コピーしました！"; // テキストを元に戻す
+        }, 2000);
+      });
+  });
   document.getElementById("resetBtn").addEventListener("click", () => {
-    window.location.reload();
+    resultText.value = "";
+    const allCells = calendarBody.querySelectorAll("td[data-date]");
+    allCells.forEach(cell => cell.classList.remove("selected-date"));
+    const allTimeOptions = timeSelect.querySelectorAll(".time-option");
+    allTimeOptions.forEach(option => option.classList.remove("selected-time"));
+    currentEntry = null;
   });
   window.addEventListener('resize', () => {
     adjustTimeSelectHeight();
+  });
+
+  // ヘルプツールチップの処理
+  const helpIcon = document.getElementById("helpIcon");
+  const helpTooltip = document.getElementById("helpTooltip");
+
+  helpIcon.addEventListener("click", function(e) {
+    e.stopPropagation();
+    helpTooltip.classList.toggle("active");
+  });
+
+  // ツールチップを閉じる
+  document.addEventListener("click", function(e) {
+    if (helpTooltip.classList.contains("active") && 
+        e.target !== helpIcon && 
+        !helpTooltip.contains(e.target)) {
+      helpTooltip.classList.remove("active");
+    }
   });
 
   // 初期表示
   updateMonthDisplay();
   generateCalendar(currentYearMonth);
   generateTimeOptions();
-
-const helpIcon = document.getElementById("helpIcon");
-const helpTooltip = document.getElementById("helpTooltip");
-
-helpIcon.addEventListener("click", function(e) {
-  e.stopPropagation();
-  helpTooltip.classList.toggle("active");
-});
-
-// Close tooltip when clicking elsewhere
-document.addEventListener("click", function(e) {
-  if (helpTooltip.classList.contains("active") && 
-      e.target !== helpIcon && 
-      !helpTooltip.contains(e.target)) {
-    helpTooltip.classList.remove("active");
-  }
-});
-
-
-
 </script>

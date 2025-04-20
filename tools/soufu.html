@@ -1,259 +1,253 @@
 ---
 layout: default
 title: "送付状PDF生成ツール"
+description: "ビジネス文書の送付状をシンプルに作成し、PDFとして保存できる便利ツール"
+keywords: "送付状, PDF生成, ビジネス文書, 書類送付"
 ---
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- jsPDF 本体 (UMD版) -->
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+<style>
+  /* ベース設定 */
+  * {
+    box-sizing: border-box;
+  }
   
-  <!-- jsPDF 本体 (UMD版) -->
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-
-  <style>
-    /* ページ全体のスタイリング */
-    * {
-      box-sizing: border-box;
-    }
-    
-    /* コンテナを中央寄せにする調整済みスタイル */
-    .container {
-      width: 100%;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 30px;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 30px;
-      font-size: 1.8rem;
-      color: #2c3e50;
-    }
-    
-    fieldset {
-      border: 1px solid #e0e0e0;
-      border-radius: 6px;
-      margin-bottom: 25px;
-      padding: 15px;
-      background-color: #fcfcfc;
-    }
-    
-    legend {
-      font-weight: bold;
-      font-size: 1.1rem;
-      margin-bottom: 10px;
-      padding: 0 10px;
-      color: #3498db;
-    }
-    
-    label {
-      display: inline-block;
-      width: 100px;
-      font-weight: bold;
-      margin-bottom: 6px;
-      color: #555;
-    }
-    
-    input, textarea, select {
-      width: calc(100% - 80px);
-      margin-top: 2px;
-      margin-bottom: 2px;
-      padding: 8px 12px;
-      font-size: 14px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-sizing: border-box;
-      transition: border-color 0.3s;
-    }
-    
-    input:focus, textarea:focus, select:focus {
-      border-color: #3498db;
-      outline: none;
-    }
-    
-    .flex-row {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 12px;
-      align-items: center;
-    }
-    
-    .flex-row label {
-      width: auto;
-      min-width: 100px;
-      margin-bottom: 0;
-      /* ▼ ラベルの上下中央揃えをより確実にするため明示的に指定 ▼ */
-      display: flex !important; 
-      align-items: center !important;
-    }
-    
-    .flex-row input[type="text"],
-    .flex-row input[type="date"],
-    .flex-row input[type="number"] {
-      width: auto;
-      flex: 1;
-    }
-
-    /* 同封物欄 */
-    .doc-list-container {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-    
-    .doc-item {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      justify-content: flex-start;
-    }
-    
-    .doc-item input.docName {
-      flex: 3;
-      min-width: 150px;
-    }
-    
-    .doc-item .count-section {
-      flex: 2;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      justify-content: flex-end; /* 書類名が伸びても数字と単位を右端に揃える */
-    }
-    
-    .docCount {
-      width: 70px;
-    }
-    
-    .unitSelect {
-      width: 70px;
-    }
-
-    button {
-      cursor: pointer;
-      padding: 10px 18px;
-      border: none;
-      border-radius: 4px;
-      font-size: 14px;
-      transition: background-color 0.3s;
-    }
-    
-    .btn-primary {
-      background-color: #3498db;
-      color: #fff;
-      margin-right: 10px;
-    }
-    
-    .btn-primary:hover {
-      background-color: #2980b9;
-    }
-    
-    .btn-secondary {
-      background-color: #7f8c8d;
-      color: #fff;
-    }
-    
-    .btn-secondary:hover {
-      background-color: #6c7a7a;
-    }
-    
-    .btn-success {
-      background-color: #2ecc71;
-      color: #fff;
-    }
-    
-    .btn-success:hover {
-      background-color: #27ae60;
-    }
-    
-    .btn-danger {
-      background-color: #e74c3c;
-      color: #fff;
-    }
-    
-    .btn-danger:hover {
-      background-color: #c0392b;
-    }
-
-    .actions {
-      margin-top: 30px;
-      text-align: center;
-    }
-
-    .hidden { 
-      display: none; 
-    }
-
-    /* ▼▼▼ モバイル（max-width:600px）向け調整 ▼▼▼ */
-    @media (max-width: 600px) {
-      /* 1) .containerの横幅を端近くまで広げる＆パディング縮小 */
-      .container {
-        max-width: 100% !important;
-        margin: 0 5px !important;
-        padding: 10px !important;
-      }
-
-      /* 2) 入力欄を「社名」ラベルから約1全角スペースずらす */
-      .flex-row input,
-      .flex-row select,
-      .flex-row textarea {
-        margin-left: 1em;
-      }
-      .flex-row label {
-        min-width: 40px !important;
-      }
-    }
-
-  /* ヘルプアイコンとタイトルのスタイル */
-  .title-container {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 30px;
+  /* コンテナを中央寄せにする調整済みスタイル */
+  .container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
   }
 
-  h1 {
-    font-size: 1.2rem !important; /* タイトルを2/3に縮小 */
-    margin: 0 !important;
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    position: relative;
+  }
+  
+  fieldset {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #fcfcfc;
+  }
+  
+  legend {
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    padding: 0 10px;
+    color: var(--primary-color);
+  }
+  
+  label {
+    display: inline-block;
+    width: 100px;
+    font-weight: bold;
+    margin-bottom: 6px;
+    color: #555;
+  }
+  
+  input, textarea, select {
+    width: calc(100% - 80px);
+    margin-top: 2px;
+    margin-bottom: 2px;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+  }
+  
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--primary-color);
+    outline: none;
+  }
+  
+  .flex-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+    align-items: center;
+  }
+  
+  .flex-row label {
+    width: auto;
+    min-width: 100px;
+    margin-bottom: 0;
+    display: flex !important; 
+    align-items: center !important;
+  }
+  
+  .flex-row input[type="text"],
+  .flex-row input[type="date"],
+  .flex-row input[type="number"] {
+    width: auto;
+    flex: 1;
+  }
+
+  /* 同封物欄 */
+  .doc-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+  
+  .doc-item {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  
+  .doc-item input.docName {
+    flex: 3;
+    min-width: 150px;
+  }
+  
+  .doc-item .count-section {
+    flex: 2;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: flex-end;
+  }
+  
+  .docCount {
+    width: 70px;
+  }
+  
+  .unitSelect {
+    width: 70px;
+  }
+
+  button {
+    cursor: pointer;
+    padding: 10px 18px;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 14px;
+    transition: background-color 0.3s, transform 0.2s;
+  }
+  
+  .btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+    margin-right: 10px;
+  }
+  
+  .btn-primary:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+  }
+  
+  .btn-secondary {
+    background-color: #7f8c8d;
+    color: white;
+  }
+  
+  .btn-secondary:hover {
+    background-color: #6c7a7a;
+    transform: translateY(-2px);
+  }
+  
+  .btn-success {
+    background-color: var(--primary-color);
+    color: white;
+  }
+  
+  .btn-success:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+  }
+  
+  .btn-danger {
+    background-color: #e74c3c;
+    color: white;
+  }
+  
+  .btn-danger:hover {
+    background-color: #c0392b;
+    transform: translateY(-2px);
+  }
+
+  .actions {
+    margin-top: 30px;
     text-align: center;
   }
 
+  .hidden { 
+    display: none; 
+  }
+
+  /* モバイル（max-width:600px）向け調整 */
+  @media (max-width: 600px) {
+    .container {
+      max-width: 100% !important;
+      margin: 0 5px !important;
+      padding: 10px !important;
+    }
+
+    .flex-row input,
+    .flex-row select,
+    .flex-row textarea {
+      margin-left: 1em;
+    }
+    
+    .flex-row label {
+      min-width: 40px !important;
+    }
+  }
+
+  /* ヘルプアイコンとタイトルのスタイル */
   .help-icon {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
-    background-color: #999;
+    background-color: var(--primary-color);
     color: white;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin-left: 8px;
+    margin-left: 10px;
     font-size: 14px;
     cursor: pointer;
     user-select: none;
     position: absolute;
     right: 0;
+    opacity: 0.8;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  
+  .help-icon:hover {
+    opacity: 1;
+    transform: scale(1.05);
   }
 
   .help-tooltip {
     display: none;
     position: absolute;
-    background-color: #f9f9f9;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    padding: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    background-color: white;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 15px;
+    box-shadow: var(--shadow);
     z-index: 1000;
     max-width: 100%;
     font-size: 14px;
-    line-height: 1.4;
+    line-height: 1.5;
     top: 30px;
     left: 0;
     right: 0;
@@ -270,143 +264,147 @@ title: "送付状PDF生成ツール"
   }
 
   .help-tooltip li {
-    margin-bottom: 6px;
+    margin-bottom: 8px;
   }
 
   .help-tooltip h4 {
-    margin: 10px 0 5px 0;
+    margin: 12px 0 8px 0;
+    color: var(--primary-color);
   }
 
-  .title-container {
-  margin-bottom: 20px !important; /* 30pxから20pxに縮小（約2/3） */
+  /* ローディングインジケーター */
+  #loadingMessage {
+    text-align: center;
+    margin-top: 20px;
+    padding: 10px;
+    background-color: rgba(0, 94, 153, 0.1);
+    border-radius: var(--radius);
+    color: var(--primary-color);
+    font-weight: bold;
   }
-  </style>
-</head>
-<body>
-  <!-- レイアウト調整のためheaderタグ削除 -->
+</style>
 
-  <div class="container">
-    <div class="title-container">
-      <h1>書類送付状PDF生成ツール</h1>
-      <div class="help-icon" id="helpIcon">?</div>
-      <div class="help-tooltip" id="helpTooltip">
-        <h4>使い方</h4>
-        <ul>
-          <li><strong>宛先情報：</strong>送付状の宛先となる会社名や担当者名を入力します。</li>
-          <li><strong>自社情報：</strong>送付元の情報を入力します。一度入力すると保存されます。</li>
-          <li><strong>書類題名＆日付：</strong>送付状の日付と題名を設定します。</li>
-          <li><strong>同封物一覧：</strong>送付する書類とその部数を入力します。「＋行追加」で複数の書類を追加できます。</li>
-        </ul>
-        <h4>操作</h4>
-        <ul>
-          <li><strong>PDF生成：</strong>入力した情報をもとにPDFを生成します。自動的にダウンロードが始まります。</li>
-          <li><strong>自動保存：</strong>自社情報と同封物情報は自動的に保存され、次回使用時に読み込まれます。</li>
-        </ul>
+<div class="page-header">
+  <h1>書類送付状PDF生成ツール</h1>
+  <div class="help-icon" id="helpIcon">?</div>
+  <div class="help-tooltip" id="helpTooltip">
+    <h4>使い方</h4>
+    <ul>
+      <li><strong>宛先情報：</strong>送付状の宛先となる会社名や担当者名を入力します。</li>
+      <li><strong>自社情報：</strong>送付元の情報を入力します。一度入力すると保存されます。</li>
+      <li><strong>書類題名＆日付：</strong>送付状の日付と題名を設定します。</li>
+      <li><strong>同封物一覧：</strong>送付する書類とその部数を入力します。「＋行追加」で複数の書類を追加できます。</li>
+    </ul>
+    <h4>操作</h4>
+    <ul>
+      <li><strong>PDF生成：</strong>入力した情報をもとにPDFを生成します。自動的にダウンロードが始まります。</li>
+      <li><strong>自動保存：</strong>自社情報と同封物情報は自動的に保存され、次回使用時に読み込まれます。</li>
+    </ul>
+  </div>
+</div>
+
+<div class="container">
+  <form id="soufuForm">
+    <!-- 宛先情報 -->
+    <fieldset>
+      <legend>宛先情報</legend>
+      <div class="flex-row">
+        <label>社名</label>
+        <input type="text" id="targetCompany" />
       </div>
-    </div>
-    <form id="soufuForm">
-      <!-- 宛先情報 -->
-      <fieldset>
-        <legend>宛先情報</legend>
-        <div class="flex-row">
-          <label>社名</label>
-          <input type="text" id="targetCompany" />
-        </div>
-        <div class="flex-row">
-          <label>部署</label>
-          <input type="text" id="targetDept" />
-        </div>
-        <div class="flex-row">
-          <label>役職</label>
-          <input type="text" id="targetTitle" />
-        </div>
-        <div class="flex-row">
-          <label>氏名</label>
-          <input type="text" id="targetName" />
-        </div>
-      </fieldset>
+      <div class="flex-row">
+        <label>部署</label>
+        <input type="text" id="targetDept" />
+      </div>
+      <div class="flex-row">
+        <label>役職</label>
+        <input type="text" id="targetTitle" />
+      </div>
+      <div class="flex-row">
+        <label>氏名</label>
+        <input type="text" id="targetName" />
+      </div>
+    </fieldset>
 
-      <!-- 自社情報 -->
-      <fieldset>
-        <legend>自社情報</legend>
-        <div class="flex-row">
-          <label>社名</label>
-          <input type="text" id="myCompany" />
-        </div>
-        <div class="flex-row">
-          <label>住所</label>
-          <input type="text" id="myAddr" />
-        </div>
-        <div class="flex-row">
-          <label>TEL</label>
-          <input type="text" id="myTel" />
-        </div>
-        <div class="flex-row">
-          <label>部署</label>
-          <input type="text" id="myDept" />
-        </div>
-        <div class="flex-row">
-          <label>役職</label>
-          <input type="text" id="myTitle" />
-        </div>
-        <div class="flex-row">
-          <label>氏名</label>
-          <input type="text" id="myName" />
-        </div>
-      </fieldset>
+    <!-- 自社情報 -->
+    <fieldset>
+      <legend>自社情報</legend>
+      <div class="flex-row">
+        <label>社名</label>
+        <input type="text" id="myCompany" />
+      </div>
+      <div class="flex-row">
+        <label>住所</label>
+        <input type="text" id="myAddr" />
+      </div>
+      <div class="flex-row">
+        <label>TEL</label>
+        <input type="text" id="myTel" />
+      </div>
+      <div class="flex-row">
+        <label>部署</label>
+        <input type="text" id="myDept" />
+      </div>
+      <div class="flex-row">
+        <label>役職</label>
+        <input type="text" id="myTitle" />
+      </div>
+      <div class="flex-row">
+        <label>氏名</label>
+        <input type="text" id="myName" />
+      </div>
+    </fieldset>
 
-      <!-- 日付＆題名 -->
-      <fieldset>
-        <legend>書類題名＆日付</legend>
-        <div class="flex-row">
-          <label>日付</label>
-          <input type="date" id="sendDate" />
-        </div>
-        <div class="flex-row">
-          <label>題名</label>
-          <input type="text" id="docTitle" value="書類送付について" />
-        </div>
-      </fieldset>
+    <!-- 日付＆題名 -->
+    <fieldset>
+      <legend>書類題名＆日付</legend>
+      <div class="flex-row">
+        <label>日付</label>
+        <input type="date" id="sendDate" />
+      </div>
+      <div class="flex-row">
+        <label>題名</label>
+        <input type="text" id="docTitle" value="書類送付について" />
+      </div>
+    </fieldset>
 
-      <!-- 同封物一覧 -->
-      <fieldset>
-        <legend>同封物一覧</legend>
-        <div id="docList" class="doc-list-container">
-          <div class="doc-item">
-            <input type="text" class="docName" placeholder="書類名" />
-            <div class="count-section">
-              <input type="number" class="docCount" placeholder="部数" min="1" value="1" />
-              <select class="unitSelect">
-                <option value="部" selected>部</option>
-                <option value="冊">冊</option>
-                <option value="点">点</option>
-              </select>
-            </div>
+    <!-- 同封物一覧 -->
+    <fieldset>
+      <legend>同封物一覧</legend>
+      <div id="docList" class="doc-list-container">
+        <div class="doc-item">
+          <input type="text" class="docName" placeholder="書類名" />
+          <div class="count-section">
+            <input type="number" class="docCount" placeholder="部数" min="1" value="1" />
+            <select class="unitSelect">
+              <option value="部" selected>部</option>
+              <option value="冊">冊</option>
+              <option value="点">点</option>
+            </select>
           </div>
         </div>
-        <button type="button" id="addDocBtn" class="btn-success">＋行追加</button>
-      </fieldset>
-
-      <div class="actions">
-        <button type="button" id="generateBtn" class="btn-primary">PDF生成</button>
       </div>
-    </form>
+      <button type="button" id="addDocBtn" class="btn-success">＋行追加</button>
+    </fieldset>
 
-    <div id="loadingMessage" class="hidden" style="text-align:center; margin-top:20px;">
-      PDFを生成しています。しばらくお待ちください...
+    <div class="actions">
+      <button type="button" id="generateBtn" class="btn-primary">PDF生成</button>
     </div>
+  </form>
 
-    <div id="previewArea" class="hidden">
-      <p>プレビュー領域(任意)</p>
-    </div>
+  <div id="loadingMessage" class="hidden">
+    PDFを生成しています。しばらくお待ちください...
   </div>
 
-  <!-- レイアウト調整のためfooterタグ削除 -->
+  <div id="previewArea" class="hidden">
+    <p>プレビュー領域(任意)</p>
+  </div>
+</div>
 
 <script>
   const { jsPDF } = window.jspdf;
 
-    // DOMContentLoadedイベントリスナーを修正
+  // DOMContentLoadedイベントリスナーを修正
   window.addEventListener('DOMContentLoaded', () => {
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -414,7 +412,7 @@ title: "送付状PDF生成ツール"
     const dd = String(today.getDate()).padStart(2, '0');
     document.getElementById('sendDate').value = `${yyyy}-${mm}-${dd}`;
 
-    // ▼ 自社情報と同封物情報のみをlocalStorageで保持
+    // 自社情報と同封物情報のみをlocalStorageで保持
     loadMyCompanyInfo();
     loadDocInfo();
   });
@@ -564,7 +562,7 @@ title: "送付状PDF生成ツール"
 
   // PDF生成ボタン
   document.getElementById('generateBtn').addEventListener('click', async () => {
-    // ★ 生成中メッセージを表示
+    // 生成中メッセージを表示
     document.getElementById('loadingMessage').classList.remove('hidden');
 
     const targetCompany = document.getElementById('targetCompany').value.trim();
@@ -722,7 +720,7 @@ title: "送付状PDF生成ツール"
 
     pdf.save("送付状.pdf");
 
-    // ★ 生成完了後にメッセージを非表示
+    // 生成完了後にメッセージを非表示
     document.getElementById('loadingMessage').classList.add('hidden');
   });
 
@@ -738,22 +736,21 @@ title: "送付状PDF生成ツール"
     }
   }
 
+  // ヘルプツールチップの処理
   const helpIcon = document.getElementById("helpIcon");
-const helpTooltip = document.getElementById("helpTooltip");
+  const helpTooltip = document.getElementById("helpTooltip");
 
-helpIcon.addEventListener("click", function(e) {
-  e.stopPropagation();
-  helpTooltip.classList.toggle("active");
-});
+  helpIcon.addEventListener("click", function(e) {
+    e.stopPropagation();
+    helpTooltip.classList.toggle("active");
+  });
 
-// ツールチップの外をクリックしたら閉じる
-document.addEventListener("click", function(e) {
-  if (helpTooltip.classList.contains("active") && 
-      e.target !== helpIcon && 
-      !helpTooltip.contains(e.target)) {
-    helpTooltip.classList.remove("active");
-  }
-});
+  // ツールチップの外をクリックしたら閉じる
+  document.addEventListener("click", function(e) {
+    if (helpTooltip.classList.contains("active") && 
+        e.target !== helpIcon && 
+        !helpTooltip.contains(e.target)) {
+      helpTooltip.classList.remove("active");
+    }
+  });
 </script>
-</body>
-</html>
