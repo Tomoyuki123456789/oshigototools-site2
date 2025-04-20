@@ -303,7 +303,6 @@ button {
 @media screen and (max-width: 768px) {
   body {
     padding: var(--space-xs);
-    max-width: 90%;
   }
   
   h1 {

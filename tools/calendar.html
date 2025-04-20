@@ -616,13 +616,31 @@ keywords: "カレンダー, 時刻選択, スケジュール, 会議調整, 予�
           return;
         }
         if (!currentEntry.times) currentEntry.times = [];
+        
         // 開始～終了のペアを決定
         if (timesAreComplete(currentEntry.times)) {
           currentEntry.times.push({ start: timeStr, end: "" });
+          
+          // すべての時間選択のハイライトをクリア
+          const allTimeOptions = timeSelect.querySelectorAll(".time-option");
+          allTimeOptions.forEach(option => option.classList.remove("selected-time"));
+          
+          // 現在選択した時間だけをハイライト
           div.classList.add("selected-time");
         } else {
           currentEntry.times[currentEntry.times.length - 1].end = timeStr;
+          
+          // すべての時間選択のハイライトをクリア
+          const allTimeOptions = timeSelect.querySelectorAll(".time-option");
+          allTimeOptions.forEach(option => option.classList.remove("selected-time"));
+          
+          // 現在選択した時間だけをハイライト (オプション)
           div.classList.add("selected-time");
+          
+          // エントリーが完成したら、少し遅れてハイライトを消す
+          setTimeout(() => {
+            div.classList.remove("selected-time");
+          }, 300); // 300ミリ秒後にハイライトを消す
         }
         updateCurrentEntryLine();
       });
