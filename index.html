@@ -5,6 +5,14 @@ description: "oshigototoolsは、日々のお仕事で使える便利でシン�
 keywords: "ツール, カレンダー, ショートカット, 時刻選択, 送付状, PDF, 生産性向上"
 ---
 
+<!-- 必要に応じてこの位置に<head>タグ内用の設定を入れてください（Jekyllのレイアウトで<head>を制御している場合は不要） -->
+<link
+  rel="preload"
+  href="/favicon/favicon.svg"
+  as="image"
+  type="image/svg+xml"
+/>
+
 <style>
   .tools-list {
     display: flex;
@@ -12,14 +20,14 @@ keywords: "ツール, カレンダー, ショートカット, 時刻選択, 送�
     gap: 15px;
     margin: 25px 0;
   }
-  
+
   .welcome-text {
     margin: 0 0 30px 0;
     font-size: 16px;
     line-height: 1.5;
     color: var(--text-color);
   }
-  
+
   .tool-panel {
     display: flex;
     align-items: center;
@@ -31,12 +39,12 @@ keywords: "ツール, カレンダー, ショートカット, 時刻選択, 送�
     transition: transform 0.2s, box-shadow 0.2s;
     overflow: hidden;
   }
-  
+
   .tool-panel:hover {
     transform: translateY(-3px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.15);
   }
-  
+
   .tool-panel a {
     display: flex;
     align-items: center;
@@ -44,99 +52,117 @@ keywords: "ツール, カレンダー, ショートカット, 時刻選択, 送�
     color: var(--text-color);
     width: 100%;
   }
-  
-  .tool-panel img {
+
+  .tool-icon {
     width: 50px;
     height: 50px;
     margin-right: 20px;
     flex-shrink: 0;
   }
-  
+
   .tool-info {
     flex-grow: 1;
   }
-  
+
   .tool-info h3 {
     color: var(--primary-color);
     margin: 0 0 5px 0;
     font-size: 18px;
   }
-  
+
   .tool-info p {
     margin: 0;
     color: #666;
     font-size: 14px;
   }
-  
+
   @media (max-width: 768px) {
     .tool-panel {
       padding: 10px;
     }
-    
-    .tool-panel img {
+    .tool-icon {
       width: 40px;
       height: 40px;
       margin-right: 15px;
     }
-    
     .tool-info h3 {
       font-size: 16px;
     }
-    
     .tool-info p {
       font-size: 13px;
     }
-
     .container {
-    width: 90%;
-    margin: 0 auto;
+      width: 90%;
+      margin: 0 auto;
     }
-    
   }
 </style>
 
 <div class="container">
-  <h1></h1>
-  
   <h2>ようこそ</h2>
   <p class="welcome-text">
     oshigototoolsは、シンプルで実用的なツールを提供し、皆様の生産性向上をサポートします。必要なツールをクリックして、すぐにご利用いただけます。
   </p>
-  
+
   <h2>ツール一覧</h2>
   <div class="tools-list">
-    
+
     <!-- カレンダー時刻選択ツール -->
     <div class="tool-panel">
       <a href="/tools/calendar.html">
-        <img src="/favicon/favicon.svg" alt="カレンダー時刻選択">
+        <img
+          class="tool-icon"
+          src="/favicon/favicon.svg"
+          alt="カレンダー時刻選択"
+          width="50"
+          height="50"
+          loading="lazy"
+          decoding="async"
+        />
         <div class="tool-info">
           <h3>カレンダー時刻選択</h3>
           <p>簡単な日付選択と時間管理</p>
         </div>
       </a>
     </div>
-    
+
     <!-- 送付状PDF生成ツール -->
     <div class="tool-panel">
       <a href="/tools/soufu.html">
-        <img src="/favicon/favicon.svg" alt="送付状PDF生成">
+        <img
+          class="tool-icon"
+          src="/favicon/favicon.svg"
+          alt="送付状PDF生成"
+          width="50"
+          height="50"
+          loading="lazy"
+          decoding="async"
+        />
         <div class="tool-info">
           <h3>送付状PDF生成</h3>
           <p>プロフェッショナルな送付状を簡単作成</p>
         </div>
       </a>
     </div>
-    
+
     <!-- ショートカットキー習得ツール -->
     <div class="tool-panel">
       <a href="/tools/shortcuts/">
-        <img src="/favicon/favicon.svg" alt="ショートカットキー習得">
+        <img
+          class="tool-icon"
+          src="/favicon/favicon.svg"
+          alt="ショートカットキー習得"
+          width="50"
+          height="50"
+          loading="lazy"
+          decoding="async"
+        />
         <div class="tool-info">
           <h3>ショートカットキー習得</h3>
           <p>効率アップのための必須キー操作を学ぶ</p>
         </div>
       </a>
     </div>
+
   </div>
 </div>
