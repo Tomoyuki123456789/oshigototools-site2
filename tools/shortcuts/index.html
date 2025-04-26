@@ -299,7 +299,8 @@ keywords: "ショートカットキー, Windows, Mac, Excel, Google スプレッ
   .keys, .sequence-keys {
     display: flex;
     flex-wrap: wrap;
-    gap: 5px;
+    gap: 3px;
+    align-items: center; /* ← ここを追加して、アイテムを上下中央に */
   }
   
   .key {
@@ -314,7 +315,7 @@ keywords: "ショートカットキー, Windows, Mac, Excel, Google スプレッ
   
   .key-step { 
     display: flex; 
-    gap: 2px; 
+    gap: 0px; 
     background: rgba(0, 94, 153, 0.05); 
     border-radius: var(--radius); 
     padding: 2px; 
@@ -323,7 +324,7 @@ keywords: "ショートカットキー, Windows, Mac, Excel, Google スプレッ
   .key-arrow { 
     color: #95a5a6; 
     font-weight: 600; 
-    margin: 0 2px; 
+    margin: 0 0px; 
   }
   
   .no-results { 
@@ -453,129 +454,197 @@ keywords: "ショートカットキー, Windows, Mac, Excel, Google スプレッ
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const shortcutsContainer = document.getElementById('shortcuts-container');
-    const searchInput = document.getElementById('searchInput');
-    const favBtn = document.getElementById('toggleFav');
-    const platformBtns = document.querySelectorAll('.platform-btn');
-    const helpIcon = document.getElementById('helpIcon');
-    const helpTooltip = document.getElementById('helpTooltip');
-    let shortcuts = {};
-    let currentPlatform = 'windows';
-    let showingFavsOnly = false;
-    let favs = JSON.parse(localStorage.getItem('shortcut_favorites') || '[]');
-    let searchTerm = '';
-    let currentTooltip = null;
+    const searchInput        = document.getElementById('searchInput');
+    const favBtn             = document.getElementById('toggleFav');
+    const platformBtns       = document.querySelectorAll('.platform-btn');
+    const helpIcon           = document.getElementById('helpIcon');
+    const helpTooltip        = document.getElementById('helpTooltip');
 
-    // ヘルプアイコンのイベントリスナー
-    helpIcon.addEventListener('click', (e) => {
+    // ─── currentPlatform は一度だけ宣言 ───
+    let currentPlatform = localStorage.getItem('shortcut_platform') || 'windows';
+    // ────────────────────────────────────────
+
+    let shortcuts       = {};
+    let showingFavsOnly = false;
+    let favs            = JSON.parse(localStorage.getItem('shortcut_favorites') || '[]');
+    let searchTerm      = '';
+    let currentTooltip  = null;
+
+    // 初期表示時に、対応するボタンだけ active を付与
+    platformBtns.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.platform === currentPlatform);
+    });
+
+    // ヘルプアイコンのトグル
+    helpIcon.addEventListener('click', e => {
       e.stopPropagation();
       helpTooltip.classList.toggle('active');
     });
-
-    // ドキュメント全体のクリックでヘルプツールチップを閉じる
-    document.addEventListener('click', (e) => {
-      if (helpTooltip.classList.contains('active') && 
-          e.target !== helpIcon && 
+    document.addEventListener('click', e => {
+      if (helpTooltip.classList.contains('active') &&
+          e.target !== helpIcon &&
           !helpTooltip.contains(e.target)) {
         helpTooltip.classList.remove('active');
       }
     });
 
+    // データ読み込み＆初回描画
     fetch('shortcuts.json')
       .then(res => res.json())
       .then(data => { shortcuts = data; renderShortcuts(); })
-      .catch(err => { console.error('データ読み込みエラー:', err); shortcutsContainer.innerHTML = '<div class="no-results">ショートカットデータを読み込めませんでした。</div>'; });
+      .catch(err => {
+        console.error('データ読み込みエラー:', err);
+        shortcutsContainer.innerHTML = '<div class="no-results">ショートカットデータを読み込めませんでした。</div>';
+      });
 
-    searchInput.addEventListener('input', e => { searchTerm = e.target.value.toLowerCase(); renderShortcuts(); });
-    platformBtns.forEach(btn => btn.addEventListener('click', () => { platformBtns.forEach(b=>b.classList.remove('active')); btn.classList.add('active'); currentPlatform = btn.dataset.platform; renderShortcuts(); }));
-    favBtn.addEventListener('click', () => { favBtn.classList.toggle('active'); showingFavsOnly = favBtn.classList.contains('active'); favBtn.querySelector('.fav-icon').textContent = showingFavsOnly ? '★' : '☆'; favBtn.querySelector('.btn-text').textContent = showingFavsOnly ? '全て表示' : 'お気に入りのみ'; renderShortcuts(); });
-    document.addEventListener('click', e => { if (e.target.classList.contains('help-icon')) return; if (currentTooltip) { currentTooltip.style.display = 'none'; currentTooltip = null; } });
+    // 検索フィルター
+    searchInput.addEventListener('input', e => {
+      searchTerm = e.target.value.toLowerCase();
+      renderShortcuts();
+    });
 
+    // プラットフォーム切替時の処理
+    platformBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        // ボタン見た目
+        platformBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        // currentPlatform 更新＆保存
+        currentPlatform = btn.dataset.platform;
+        localStorage.setItem('shortcut_platform', currentPlatform);
+        // 再描画
+        renderShortcuts();
+      });
+    });
+
+    // お気に入りトグル
+    favBtn.addEventListener('click', () => {
+      favBtn.classList.toggle('active');
+      showingFavsOnly = favBtn.classList.contains('active');
+      favBtn.querySelector('.fav-icon').textContent = showingFavsOnly ? '★' : '☆';
+      favBtn.querySelector('.btn-text').textContent = showingFavsOnly ? '全て表示' : 'お気に入りのみ';
+      renderShortcuts();
+    });
+
+    // パネル内ヘルプツールチップを閉じる
+    document.addEventListener('click', e => {
+      if (e.target.classList.contains('help-icon')) return;
+      if (currentTooltip) {
+        currentTooltip.style.display = 'none';
+        currentTooltip = null;
+      }
+    });
+
+    // ─── 既存の renderShortcuts 関数定義 ───
+    function renderShortcuts() {
+      const data = shortcuts[currentPlatform] || {};
+      let html = '';
+
+      if (showingFavsOnly) {
+        let list = Object.values(data).flat()
+          .filter(item => favs.includes(item.action))
+          .filter(item => !searchTerm || item.action.toLowerCase().includes(searchTerm) || (item.comment && item.comment.toLowerCase().includes(searchTerm)));
+        const seen = new Set();
+        list = list.filter(item => {
+          if (seen.has(item.action)) return false;
+          seen.add(item.action);
+          return true;
+        });
+        if (list.length > 0) {
+          html += `<div class="category-section"><h2>お気に入り</h2><div class="grid-container">`;
+          list.forEach((item, i) => html += renderPanel(item, i));
+          html += `</div></div>`;
+        } else {
+          html = '<div class="no-results">該当するショートカットが見つかりません</div>';
+        }
+      } else {
+        // おすすめ
+        let allItems = Object.values(data).flat();
+        let rec = allItems.filter(item => item.recommend)
+          .filter(item => !searchTerm || item.action.toLowerCase().includes(searchTerm) || (item.comment && item.comment.toLowerCase().includes(searchTerm)));
+        if (rec.length > 0) {
+          html += `<div class="category-section"><h2>おすすめショートカット</h2><div class="grid-container">`;
+          rec.forEach((item, i) => html += renderPanel(item, i));
+          html += `</div></div>`;
+        }
+        // カテゴリ別
+        Object.keys(data).forEach(category => {
+          let list = data[category].filter(item => !searchTerm || item.action.toLowerCase().includes(searchTerm) || (item.comment && item.comment.toLowerCase().includes(searchTerm)));
+          if (list.length > 0) {
+            html += `<div class="category-section"><h2>${category}</h2><div class="grid-container">`;
+            list.forEach((item, i) => html += renderPanel(item, i));
+            html += `</div></div>`;
+          }
+        });
+      }
+
+      shortcutsContainer.innerHTML = html;
+
+      // 星クリック
+      document.querySelectorAll('.panel .star').forEach(star => {
+        star.addEventListener('click', e => {
+          e.stopPropagation();
+          const action = e.currentTarget.parentElement.dataset.action;
+          if (favs.includes(action)) favs = favs.filter(a => a !== action);
+          else favs.push(action);
+          localStorage.setItem('shortcut_favorites', JSON.stringify(favs));
+          document.querySelectorAll(`.panel[data-action="${action}"] .star`)
+            .forEach(s => s.classList.toggle('favorited'));
+          if (showingFavsOnly) renderShortcuts();
+        });
+      });
+
+      // ツールチップ
+      document.querySelectorAll('.panel .help-icon').forEach(icon => {
+        icon.addEventListener('click', e => {
+          e.stopPropagation();
+          if (currentTooltip) {
+            currentTooltip.style.display = 'none';
+            if (currentTooltip === icon.nextElementSibling) {
+              currentTooltip = null;
+              return;
+            }
+          }
+          const tip = icon.nextElementSibling;
+          tip.style.display = 'block';
+          currentTooltip = tip;
+          tip.style.width = (icon.parentElement.offsetWidth - 40) + 'px';
+        });
+      });
+    }
+
+    // ─── renderPanel 関数も既存のまま ───
     function renderPanel(item, index) {
       const isFav = favs.includes(item.action);
       const delay = Math.min(index * 30, 300);
       const isSeq = item.sequence === true;
       const comment = item.comment || '';
       let keysHtml = '';
+
       if (isSeq) {
         if (item.steps) {
-          keysHtml = item.keys.map((stepKeys, i) => `<div class="key-step">${stepKeys.map(k=>`<span class="key">${k}</span>`).join('')}</div>${i<item.keys.length-1?'<span class="key-arrow">→</span>':''}`).join('');
+          keysHtml = item.keys.map((stepKeys, i) =>
+            `<div class="key-step">${stepKeys.map(k => `<span class="key">${k}</span>`).join('')}</div>${i < item.keys.length - 1 ? '<span class="key-arrow">→</span>' : ''}`
+          ).join('');
         } else {
-          keysHtml = item.keys.map((k,i)=>`<span class="key">${k}</span>${i<item.keys.length-1?'<span class="key-arrow">→</span>':''}`).join('');
+          keysHtml = item.keys.map((k, i) =>
+            `<span class="key">${k}</span>${i < item.keys.length - 1 ? '<span class="key-arrow">→</span>' : ''}`
+          ).join('');
         }
       } else {
-        keysHtml = item.keys.map(k=>`<span class="key">${k}</span>`).join('');
+        keysHtml = item.keys.map(k => `<span class="key">${k}</span>`).join('');
       }
+
       return `
         <div class="panel" data-action="${item.action}" style="animation-delay: ${delay}ms">
-          <div class="star ${isFav?'favorited':''}">★</div>
+          <div class="star ${isFav ? 'favorited' : ''}">★</div>
           <div class="help-icon" title="詳細を表示">?</div>
           <div class="tooltip">${comment}</div>
           <strong>${item.action}</strong>
-          <div class="${isSeq?'sequence-keys':'keys'}">${keysHtml}</div>
+          <div class="${isSeq ? 'sequence-keys' : 'keys'}">${keysHtml}</div>
         </div>
       `;
     }
 
-    function renderShortcuts() {
-      const data = shortcuts[currentPlatform]||{};
-      let html = '';
-
-      if (showingFavsOnly) {
-        let list = Object.values(data).flat().filter(item=>favs.includes(item.action));
-        if (searchTerm) list = list.filter(item=>item.action.toLowerCase().includes(searchTerm)||(item.comment&&item.comment.toLowerCase().includes(searchTerm)));
-        const seen=new Set();
-        list = list.filter(item=>{ if(seen.has(item.action)) return false; seen.add(item.action); return true; });
-        if (list.length>0) {
-          html += `<div class="category-section"><h2>お気に入り</h2><div class="grid-container">`;
-          list.forEach((item,i)=> html+=renderPanel(item,i));
-          html += `</div></div>`;
-        } else html = '<div class="no-results">該当するショートカットが見つかりません</div>';
-        shortcutsContainer.innerHTML = html;
-      } else {
-        //おすすめ
-        let allItems = Object.values(data).flat();
-        let rec = allItems.filter(item=>item.recommend);
-        if (searchTerm) rec = rec.filter(item=>item.action.toLowerCase().includes(searchTerm)||(item.comment&&item.comment.toLowerCase().includes(searchTerm)));
-        if (rec.length>0) {
-          html += `<div class="category-section"><h2>おすすめショートカット</h2><div class="grid-container">`;
-          rec.forEach((item,i)=> html+=renderPanel(item,i));
-          html += `</div></div>`;
-        }
-        //カテゴリ別
-        Object.keys(data).forEach(category=>{
-          let list = data[category];
-          if (searchTerm) list = list.filter(item=>item.action.toLowerCase().includes(searchTerm)||(item.comment&&item.comment.toLowerCase().includes(searchTerm)));
-          if (list.length>0) {
-            html += `<div class="category-section"><h2>${category}</h2><div class="grid-container">`;
-            list.forEach((item,i)=> html+=renderPanel(item,i));
-            html += `</div></div>`;
-          }
-        });
-        shortcutsContainer.innerHTML = html;
-      }
-
-      // 星クリック
-      document.querySelectorAll('.panel .star').forEach(star=>{
-        star.addEventListener('click', e=>{
-          e.stopPropagation();
-          const action = e.currentTarget.parentElement.dataset.action;
-          if (favs.includes(action)) favs = favs.filter(a=>a!==action);
-          else favs.push(action);
-          localStorage.setItem('shortcut_favorites', JSON.stringify(favs));
-          document.querySelectorAll(`.panel[data-action=\"${action}\"] .star`).forEach(s=>s.classList.toggle('favorited'));
-          if (showingFavsOnly) renderShortcuts();
-        });
-      });
-      // ツールチップ
-      document.querySelectorAll('.panel .help-icon').forEach(icon=>{
-        icon.addEventListener('click', e=>{
-          e.stopPropagation();
-          if (currentTooltip) { currentTooltip.style.display='none'; if (currentTooltip===icon.nextElementSibling) { currentTooltip=null; return; } }
-          const tip = icon.nextElementSibling;
-          tip.style.display='block'; currentTooltip=tip;
-          tip.style.width=(icon.parentElement.offsetWidth-40)+'px';
-        });
-      });
-    }
   });
 </script>
