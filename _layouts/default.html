@@ -39,30 +39,30 @@
   <!-- Styles -->
   <link rel="stylesheet" href="{{ '/css/common.css' | relative_url }}">
   
-  <!-- シェアボタンの新しいスタイル -->
+  <!-- シェアボタンのスタイル（モバイル対応強化版） -->
   <style>
     /* シェアボタンのスタイル */
     .share-container {
-      margin-top: 3rem;
+      margin-top: 2rem;
       margin-bottom: 2rem;
-    }
-    
-    .share-heading {
-      text-align: center;
-      font-size: 1.125rem;
-      font-weight: 500;
-      margin-bottom: 1rem;
+      width: 100%;
+      /* 確実に表示されるようにdisplayプロパティを追加 */
+      display: block !important;
+      position: relative;
+      z-index: 10;
     }
     
     .share-buttons {
-      display: flex;
+      display: flex !important;
       flex-wrap: wrap;
-      gap: 1rem;
+      gap: 0.75rem;
       justify-content: center;
+      align-items: center;
+      width: 100%;
     }
     
     .share-link {
-      display: flex;
+      display: flex !important;
       align-items: center;
       text-decoration: none;
       background-color: white;
@@ -72,6 +72,13 @@
       transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
+      /* モバイルでのタップ領域を広げる */
+      min-width: 2.5rem;
+      min-height: 2.5rem;
+      justify-content: center;
+      /* モバイルでも確実に表示されるよう */
+      opacity: 1 !important;
+      visibility: visible !important;
     }
     
     .share-link:hover {
@@ -83,6 +90,8 @@
       width: 1.5rem;
       height: 1.5rem;
       z-index: 1;
+      /* アイコンが表示されない問題を防ぐため */
+      display: block !important;
     }
     
     .share-name {
@@ -93,9 +102,32 @@
       z-index: 1;
     }
     
-    .share-link:hover .share-name {
-      max-width: 150px;
-      margin-left: 0.5rem;
+    /* PC表示時のみ名前を表示する */
+    @media (min-width: 768px) {
+      .share-link:hover .share-name {
+        max-width: 150px;
+        margin-left: 0.5rem;
+      }
+    }
+    
+    /* モバイル向けの調整 */
+    @media (max-width: 767px) {
+      .share-link {
+        padding: 0.75rem;
+        /* モバイルで確実に表示されるように */
+        display: flex !important;
+      }
+      
+      .share-buttons {
+        gap: 1rem;
+        /* モバイルで確実に表示されるように */
+        display: flex !important;
+      }
+      
+      .share-container {
+        margin-top: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
     }
     
     .share-bg {
@@ -107,7 +139,8 @@
       border-radius: 9999px;
     }
     
-    .share-link:hover .share-bg {
+    .share-link:hover .share-bg,
+    .share-link:active .share-bg {
       transform: scale(1);
     }
     
@@ -143,14 +176,14 @@
   <main class="flex-1 max-w-4xl mx-auto p-4">
     {{ content }}
 
-    <!-- 新しいシェアボタン (見出しなし) -->
+    <!-- モバイル対応のシェアボタン -->
     <div class="share-container">
       <div class="share-buttons">
         <!-- X (Twitter) -->
         <a href="https://twitter.com/intent/tweet?text={{ page.title | uri_escape }}%20{{ site.url | append: page.url | uri_escape }}" 
            target="_blank" rel="noopener" class="share-link" aria-label="Share on X (Twitter)">
           <div class="share-bg"></div>
-          <img src="/assets/x-icon.svg" alt="X (旧Twitter)" class="share-icon">
+          <img src="{{ '/assets/x-icon.svg' | relative_url }}" alt="X (旧Twitter)" class="share-icon">
           <span class="share-name share-x-color">X</span>
         </a>
         
@@ -158,7 +191,7 @@
         <a href="https://bsky.app/intent/compose?text={{ page.title | uri_escape }}%20{{ site.url | append: page.url | uri_escape }}" 
            target="_blank" rel="noopener" class="share-link" aria-label="Share on Bluesky">
           <div class="share-bg"></div>
-          <img src="/assets/bluesky-icon.svg" alt="Bluesky" class="share-icon">
+          <img src="{{ '/assets/bluesky-icon.svg' | relative_url }}" alt="Bluesky" class="share-icon">
           <span class="share-name share-bluesky-color">Bluesky</span>
         </a>
         
@@ -166,7 +199,7 @@
         <a href="https://www.threads.net/intent/post?text={{ page.title | uri_escape }}%20{{ site.url | append: page.url | uri_escape }}" 
            target="_blank" rel="noopener" class="share-link" aria-label="Share on Threads">
           <div class="share-bg"></div>
-          <img src="/assets/threads-icon.svg" alt="Threads" class="share-icon">
+          <img src="{{ '/assets/threads-icon.svg' | relative_url }}" alt="Threads" class="share-icon">
           <span class="share-name share-threads-color">Threads</span>
         </a>
         
@@ -174,7 +207,7 @@
         <a href="https://social-plugins.line.me/lineit/share?url={{ site.url | append: page.url | uri_escape }}" 
            target="_blank" rel="noopener" class="share-link" aria-label="Share on LINE">
           <div class="share-bg"></div>
-          <img src="/assets/line-icon.svg" alt="LINE" class="share-icon">
+          <img src="{{ '/assets/line-icon.svg' | relative_url }}" alt="LINE" class="share-icon">
           <span class="share-name share-line-color">LINE</span>
         </a>
       </div>
@@ -183,5 +216,32 @@
   </main>
 
   {% include footer.html %}
+  
+  <!-- デバッグ用スクリプト -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // シェアボタンの表示を確認
+      console.log('Share container exists:', !!document.querySelector('.share-container'));
+      console.log('Share buttons exist:', !!document.querySelector('.share-buttons'));
+      console.log('Share links count:', document.querySelectorAll('.share-link').length);
+      
+      // モバイル表示でボタンが見えないときのデバッグ
+      const shareContainer = document.querySelector('.share-container');
+      const shareButtons = document.querySelector('.share-buttons');
+      
+      if (shareContainer) {
+        console.log('Share container styles:', window.getComputedStyle(shareContainer));
+      }
+      
+      if (shareButtons) {
+        console.log('Share buttons styles:', window.getComputedStyle(shareButtons));
+        
+        // 各シェアボタンのスタイルをチェック
+        document.querySelectorAll('.share-link').forEach((link, index) => {
+          console.log(`Share link ${index} styles:`, window.getComputedStyle(link));
+        });
+      }
+    });
+  </script>
 </body>
 </html>
