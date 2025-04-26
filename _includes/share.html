@@ -1,0 +1,30 @@
+{%- comment -%} Mastodon / Threads / Bluesky 共通シェアコンポーネント {%- endcomment -%}
+{% assign page_title = page.title | uri_escape %}
+{% assign page_url   = site.url | append: page.url | uri_escape %}
+
+{% comment %}
+  ---- YOURLS と連携する場合 ----
+  ① site.urlshort を _config.yml に書く
+     urlshort: "https://go.あなたのドメイン/"
+  ② YOURLS 側で API キーを発行
+  ③ generate_short_url の部分を Ajax で叩くよう拡張
+{% endcomment %}
+
+<div class="share-buttons" style="display:flex;gap:8px;">
+  <a href="https://mastodon.social/share?text={{ page_title }}%20{{ page_url }}"
+     target="_blank" rel="noopener" class="btn-share">Mastodon</a>
+
+  <a href="https://www.threads.net/intent/post?text={{ page_title }}%20{{ page_url }}"
+     target="_blank" rel="noopener" class="btn-share">Threads</a>
+
+  <a href="https://bsky.app/intent/compose?text={{ page_title }}%20{{ page_url }}"
+     target="_blank" rel="noopener" class="btn-share">Bluesky</a>
+</div>
+
+<style>
+.btn-share{
+  border:1px solid #e5e7eb;padding:4px 12px;border-radius:8px;
+  text-decoration:none;font-size:0.875rem;transition:background .2s;
+}
+.btn-share:hover{background:#f4f4f5}
+</style>
