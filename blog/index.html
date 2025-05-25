@@ -1,0 +1,391 @@
+---
+layout: default
+title: "ブログ - oshigototools"
+description: "oshigototoolsの使い方や仕事効率化のコツをご紹介します。"
+---
+
+<div class="blog-header">
+  <div class="container">
+    <h1>oshigototools ブログ</h1>
+    <p class="blog-subtitle">仕事効率化のコツとツール活用法をお届けします</p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="blog-layout">
+    
+    <!-- メインコンテンツ -->
+    <main class="blog-main">
+      <div class="blog-posts">
+        
+        <article class="blog-post-card">
+          <div class="post-meta">
+            <span class="post-category">ツール活用</span>
+            <span class="post-date">2025年5月25日</span>
+          </div>
+          <h2 class="post-title">
+            <a href="/blog/calendar-tips.html">カレンダーツールで会議調整が10倍楽になった話</a>
+          </h2>
+          <p class="post-excerpt">毎週10件以上の会議調整をしている私が、カレンダーツールを使って劇的に時間短縮できた方法をお伝えします。実際の使用例も交えて...</p>
+          <div class="post-footer">
+            <span class="read-time">📖 3分で読める</span>
+            <a href="/blog/calendar-tips.html" class="read-more">続きを読む →</a>
+          </div>
+        </article>
+
+        <!-- 将来の記事用 -->
+        <!--
+        <article class="blog-post-card">
+          <div class="post-meta">
+            <span class="post-category">効率化</span>
+            <span class="post-date">2025年5月20日</span>
+          </div>
+          <h2 class="post-title">
+            <a href="/blog/shortcut-mastery.html">ショートカットキーで作業革命</a>
+          </h2>
+          <p class="post-excerpt">PC作業が驚くほど速くなるショートカットキーの覚え方と活用法。実際に使って効果があったテクニックを...</p>
+          <div class="post-footer">
+            <span class="read-time">📖 5分で読める</span>
+            <a href="/blog/shortcut-mastery.html" class="read-more">続きを読む →</a>
+          </div>
+        </article>
+        -->
+
+      </div>
+
+      <!-- ページネーション（将来用） -->
+      <!--
+      <nav class="pagination">
+        <a href="#" class="pagination-prev">← 前のページ</a>
+        <span class="pagination-current">1</span>
+        <a href="#" class="pagination-next">次のページ →</a>
+      </nav>
+      -->
+    </main>
+
+    <!-- サイドバー -->
+    <aside class="blog-sidebar">
+      
+      <!-- 人気記事 -->
+      <div class="sidebar-widget">
+        <h3 class="widget-title">人気記事</h3>
+        <ul class="popular-posts">
+          <li>
+            <a href="/blog/calendar-tips.html">
+              <span class="popular-post-title">カレンダーツールで会議調整が10倍楽になった話</span>
+              <span class="popular-post-date">2025.5.25</span>
+            </a>
+          </li>
+          <!-- 今後追加 -->
+        </ul>
+      </div>
+
+      <!-- カテゴリー -->
+      <div class="sidebar-widget">
+        <h3 class="widget-title">カテゴリー</h3>
+        <ul class="category-list">
+          <li><a href="#">ツール活用 <span class="post-count">(1)</span></a></li>
+          <li><a href="#">効率化 <span class="post-count">(0)</span></a></li>
+          <li><a href="#">働き方 <span class="post-count">(0)</span></a></li>
+        </ul>
+      </div>
+
+      <!-- ツール紹介 -->
+      <div class="sidebar-widget tools-promo">
+        <h3 class="widget-title">🛠️ ツールを試してみる</h3>
+        <div class="tool-links">
+          <a href="/tools/calendar.html" class="tool-link">📅 カレンダーツール</a>
+          <a href="/tools/soufu.html" class="tool-link">📄 送付状ツール</a>
+          <a href="/tools/shortcuts/" class="tool-link">⌨️ ショートカット練習</a>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+</div>
+
+<style>
+<style>
+/* ブログヘッダー */
+.blog-header {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  color: white;
+  padding: 60px 0;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.blog-header h1 {
+  font-size: 2.5rem;
+  margin: 0 0 10px 0;
+  font-weight: 700;
+}
+
+.blog-subtitle {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* ブログレイアウト */
+.blog-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 40px;
+  margin-top: 0;
+}
+
+@media (max-width: 768px) {
+  .blog-layout {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+}
+
+/* メインコンテンツ */
+.blog-main {
+  /* メインエリア */
+}
+
+/* 記事カード */
+.blog-post-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 30px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.blog-post-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.post-meta {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.post-category {
+  background: var(--primary-color);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.post-date {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.post-title {
+  margin: 0 0 15px 0;
+  font-size: 1.5rem;
+  line-height: 1.4;
+}
+
+.post-title a {
+  text-decoration: none;
+  color: #1f2937;
+  transition: color 0.2s;
+}
+
+.post-title a:hover {
+  color: var(--primary-color);
+}
+
+.post-excerpt {
+  color: #4b5563;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  font-size: 15px;
+}
+
+.post-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 20px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.read-time {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.read-more {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.read-more:hover {
+  color: var(--primary-dark);
+}
+
+/* サイドバー */
+.blog-sidebar {
+  /* サイドバー */
+}
+
+.sidebar-widget {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 25px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.widget-title {
+  margin: 0 0 20px 0;
+  font-size: 1.2rem;
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--primary-light);
+  padding-bottom: 8px;
+}
+
+/* 人気記事 */
+.popular-posts {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.popular-posts li {
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.popular-posts li:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.popular-posts a {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  transition: color 0.2s;
+}
+
+.popular-posts a:hover {
+  color: var(--primary-color);
+}
+
+.popular-post-title {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 5px;
+  line-height: 1.4;
+}
+
+.popular-post-date {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* カテゴリー */
+.category-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.category-list li {
+  margin-bottom: 10px;
+}
+
+.category-list a {
+  text-decoration: none;
+  color: #4b5563;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  transition: color 0.2s;
+}
+
+.category-list a:hover {
+  color: var(--primary-color);
+}
+
+.post-count {
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+/* ツール紹介 */
+.tools-promo {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border: 2px solid var(--primary-light);
+}
+
+.tool-links {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tool-link {
+  display: block;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 15px;
+  text-decoration: none;
+  color: var(--primary-color);
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.tool-link:hover {
+  background: var(--primary-color);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* ページネーション */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-top: 40px;
+  padding-top: 30px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.pagination a, .pagination-current {
+  padding: 10px 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--primary-color);
+  transition: all 0.2s;
+}
+
+.pagination a:hover {
+  background: var(--primary-color);
+  color: white;
+}
+
+.pagination-current {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+</style>
+</style>
